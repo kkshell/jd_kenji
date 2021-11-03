@@ -1,8 +1,5 @@
 ## 搬运整合 原仓库地址 https://github.com/zero205/JD_tencent_scf
-## 请勿直接fork！！云函数用户先按照下方教程建立私库！！！
 ## 已经创建公开仓库的请点击仓库右上角`Setting`，拉到页面最下方，点击`Change visibility`，选择`Make private`，填入黑体仓库名称进行确认!
-
-**建议阅读@hshx123大佬的[教程](https://66ccff.work/teach/jd.html)(就不用看下面步骤了)**
 
 * 1.创建新仓库[点击创建自己的仓库](https://github.com/new)
 * 2.点击`Import a repository`，在`Your old repository’s clone URL`处填入https://github.com/lukesyy/jd_yun
@@ -13,14 +10,7 @@
 
 # 使用教程（觉得有用的可以点个⭐star :blush:）  
 
-* > 【青龙】拉取仓库命令：`ql repo https://github.com/lukesyy/jd_yun.git "jd_|jx_|getJDCookie"  "backUp|icon" "^jd[^_]|USER|sendNotify|sign_graphics_validate|JDJR"`  
-
-* > 腾讯云函数部署建议阅读@hshx123大佬的[教程](https://66ccff.work/teach/jd.html)【推荐】.[旧教程](./backUp/tencentscf.md)【不推荐】
-
-* > [elecV2P](https://github.com/elecV2/elecV2P) 部署【备用】
-    * 安装教程：[点此查看](https://github.com/elecV2/elecV2P-dei/blob/master/docs/01-overview.md)  
-    * 订阅任务：`https://ghproxy.com/https://raw.githubusercontent.com/zero205/JD_tencent_scf/main/jd_task.json`
-    * elecV2P京东CK、通知填写格式等相关补充说明：[点此查看](./backUp/elecV2P.md)  
+* > 【青龙】拉取仓库命令：`ql repo https://github.com/kkshell/jd_kenji.git "jd_|jx_|raw_|only_|getJDCookie"  "backUp|icon" "^jd[^_]|USER|sendNotify|sign_graphics_validate|JDJR"`  
 
 - 获取京东cookie教程可参考：
   
@@ -52,6 +42,10 @@
 
 ## 特别感谢(排名不分先后)：
 
+
+* [@smiek2121](https://github.com/smiek2121)
+
+* [@lukesyy](https://github.com/lukesyy)
 
 * [@NobyDa](https://github.com/NobyDa)
 
