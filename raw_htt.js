@@ -1,4 +1,6 @@
 /*
+[Script]
+cron "50 1 * * *" raw_htt.js, tag:惠头条
 下载地址
 http://a13.app.qq.com/o/simple.jsp?pkgname=com.cashtoutiao&ckey=CK1430507080047
 邀请码必填得金币 05702911
