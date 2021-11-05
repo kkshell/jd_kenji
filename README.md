@@ -10,7 +10,7 @@
 
 # 使用教程（觉得有用的可以点个⭐star :blush:）  
 
-* > 【青龙】拉取仓库命令：`ql repo https://github.com/kkshell/jd_kenji.git "jd_|jx_|raw_|only_|getJDCookie"  "backUp|icon" "^jd[^_]|USER|sendNotify|sign_graphics_validate|JDJR"`  
+* > 【青龙】拉取仓库命令：`ql repo https://github.com/kkshell/jd_kenji.git "jd_|gua_|jx_|raw_|only_|getJDCookie"  "backUp|icon" "^jd[^_]|USER|sendNotify|sign_graphics_validate|JDJR"`  
 
 - 获取京东cookie教程可参考：
   
