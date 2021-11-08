@@ -17,6 +17,10 @@ Date.prototype.Format = function(fmt) {
             "q+": Math.floor((n.getMonth() + 3) / 3),
             "S+": n.getMilliseconds()
         };
+    let request = require("request");
+    let crytojs = require("crypto-js");
+    let qs = require('querystring');
+    date.prototype.fo
     /(y+)/i.test(d) && (d = d.replace(RegExp.$1, "".concat(n.getFullYear()).substr(4 - RegExp.$1.length)));
     for (var k in l) {
         if (new RegExp("(".concat(k, ")")).test(d)) {
@@ -24,6 +28,7 @@ Date.prototype.Format = function(fmt) {
             d = d.replace(RegExp.$1, 1 == RegExp.$1.length ? l[k] : ("".concat(a) + l[k]).substr("".concat(l[k]).length))
         }
     }
+
     return d;
 }
 
