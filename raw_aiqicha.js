@@ -33,6 +33,8 @@ let oo = {
     CX12006: "邀请任务",
     CX12007: "高级搜索",
     CX12008: "高级筛选",
+    CX12009: "浏览互动",
+    CX12011: "点赞观点"
 };
 
 const headers = {
@@ -224,16 +226,34 @@ async function dotask(taskList) {
                 );
                 break;
             case "CX12008": //高级筛选
-                console.log("开始任务：" + oo[o.title]);
-                await get(
-                    `search/advanceFilterAjax?q=%E7%A6%8F%E5%B7%9E%E6%AF%8F%E6%97%A5&t=0&p=1&s=10&o=0`,
-                    "get"
-                );
+                console.log("取消任务高级筛选：" + oo[o.title]);
+                // await get(
+                //     `search/advanceFilterAjax?q=%E7%A6%8F%E5%B7%9E%E6%AF%8F%E6%97%A5&t=0&p=1&s=10&o=0`,
+                //     "get"
+                // );
                 break;
+            case "CX12009": //浏览互动
+                console.log("开始任务：" + oo[o.title])
+                let HomeQuestionres= await get("smart/getHomeQuestionListAjax?page=2&size=10&type=recommend")
+                if(HomeQuestionres.status==0) {qdetail = HomeQuestionres.data.list[Math.floor((Math.random()*HomeQuestionres.data.list.length))]
+                    nid = qdetail.nid
+                    await get(`smart/questionDetailAjax?nid=${nid}`)}
+                break
+            case "CX12011": //点赞观点
+                console.log("开始任务：" + oo[o.title])
+                nid = nid?nid:"1851233986328193016"
+                let qCListres = await get(`smart/questionCommentListAjax?nid=${nid}`)
+                if(qCListres.status==0) {
+                    pList = qCListres.data.list
+                    randomkey = Math.floor((Math.random()*pList.length))
+                    pid = pList[randomkey].reply_id
+                    await get(`smart/updownAjax?undoType=0&clientType=app&nid=${nid}&parentId=${pid}`)
+                }
+                break
             default:
                 break;
         }
-        await sleep(5000);
+        await sleep(10000);
         console.log("  去领取爱豆");
         let clres = await get(
             `zxcenter/claimUserTaskAjax?taskCode=${o.title}`,

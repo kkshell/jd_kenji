@@ -529,6 +529,18 @@ function randomString(e) {
     n += t.charAt(Math.floor(Math.random() * a));
   return n
 }
+function jsonParseNew(str) {
+  if (typeof str == "map") {
+    try {
+      return JSON.parse(str)
+    } catch (e) {
+      console.log(e)
+      $.msg($.name, '', '请勿随意再BoxJs输入框修改内容\n建议通过脚本去获取cookie');
+    } finally {
+
+    }
+  }
+}
 
 function jsonParse(str) {
   if (typeof str == "string") {
