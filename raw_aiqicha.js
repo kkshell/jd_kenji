@@ -32,7 +32,7 @@ let oo = {
     CX12005: "分享任务",
     CX12006: "邀请任务",
     CX12007: "高级搜索",
-    CX12008: "高级筛选",
+    // CX12008: "高级筛选",
     CX12009: "浏览互动",
     CX12011: "点赞观点"
 };
@@ -46,6 +46,7 @@ const headers = {
     Host: "aiqicha.baidu.com",
     cookie: "",
 };
+var nid = null;
 
 function rand() {
     let key = ["苹果", "华为", "百度", "一个", "暴风", "王者"];
@@ -178,7 +179,7 @@ async function dotask(taskList) {
             case "CX11010": //批量查询
                 console.log("开始任务：" + oo[o.title]);
                 await get(
-                    `batchquery/show?exportkey=xlTM-TogKuTwFXlQeIXL0-Z9C*YO4vCwtkRdM7XV9*7FpZRZtSR8*2qgItOy*xqmSxZSsju-YgmZmd`,
+                    `batchquery/show?exportkey=xlTM-TogKuTwFXlQeIXL0-ZSYg3hsic*l8GeygZ33JY5yKM7wIuRZJ9YNE*8CciQoAU5UjsmI-hdmd`,
                     "get"
                 );
                 await sleep(5000);
@@ -225,13 +226,13 @@ async function dotask(taskList) {
                     "get"
                 );
                 break;
-            case "CX12008": //高级筛选
-                console.log("取消任务高级筛选：" + oo[o.title]);
-                // await get(
-                //     `search/advanceFilterAjax?q=%E7%A6%8F%E5%B7%9E%E6%AF%8F%E6%97%A5&t=0&p=1&s=10&o=0`,
-                //     "get"
-                // );
-                break;
+            // case "CX12008": //高级筛选
+            //     console.log("取消任务高级筛选：" + oo[o.title]);
+            //     await get(
+            //         `search/advanceFilterAjax?q=%E7%A6%8F%E5%B7%9E%E6%AF%8F%E6%97%A5&t=0&p=1&s=10&o=0`,
+            //         "get"
+            //     );
+            //     break;
             case "CX12009": //浏览互动
                 console.log("开始任务：" + oo[o.title])
                 let HomeQuestionres= await get("smart/getHomeQuestionListAjax?page=2&size=10&type=recommend")
