@@ -476,6 +476,7 @@ async function qldraw(){
         })
     })
 }
+
 async function info(){
     return new Promise((resolve) => {
         qlsign = JSON.parse(htthd)
