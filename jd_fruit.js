@@ -7,8 +7,7 @@
 脚本兼容: QuantumultX, Surge, Loon, JSBox, Node.js
 互助码shareCode请先手动运行脚本查看打印可看到
 一天只能帮助3个人。多出的助力码无效
-
-
+// zero205：已添加自己账号内部互助，有剩余助力次数再帮我助力
 ==========================Quantumultx=========================
 [task_local]
 #jd免费水果
@@ -16,44 +15,33 @@
 =========================Loon=============================
 [Script]
 cron "5 6-18/6 * * *" script-path=https://gitee.com/lxk0301/jd_scripts/raw/master/jd_fruit.js,tag=东东农场
-
 =========================Surge============================
 东东农场 = type=cron,cronexp="5 6-18/6 * * *",wake-system=1,timeout=3600,script-path=https://gitee.com/lxk0301/jd_scripts/raw/master/jd_fruit.js
-
 =========================小火箭===========================
 东东农场 = type=cron,script-path=https://gitee.com/lxk0301/jd_scripts/raw/master/jd_fruit.js, cronexpr="5 6-18/6 * * *", timeout=3600, enable=true
-
 jd免费水果 搬的https://github.com/liuxiaoyucc/jd-helper/blob/a6f275d9785748014fc6cca821e58427162e9336/fruit/fruit.js
 */
-let sc = require("./cdle_carry_share_code.js")
 const $ = new Env('东东农场');
-let cookiesArr = [],
-    cookie = '',
-    jdFruitShareArr = [],
-    isBox = false,
-    notify, newShareCodes, allMessage = '';
+let cookiesArr = [], cookie = '', jdFruitShareArr = [], isBox = false, notify, newShareCodes, allMessage = '';
 //助力好友分享码(最多3个,否则后面的助力失败),原因:京东农场每人每天只有3次助力机会
 //此此内容是IOS用户下载脚本到本地使用，填写互助码的地方，同一京东账号的好友互助码请使用@符号隔开。
 //下面给出两个账号的填写示例（iOS只支持2个京东账号）
 let shareCodes = [ // 这个列表填入你要助力的好友的shareCode
-  '', ''
+  '9bfe7b5b330f4af0b1f979fc87fe2944','db1a64cba2934c068995fcb0637dfeb3','858d29c021004be29f1df903ee11e3f7','4db526e2a5194fffbb5f73943f2cac56'
 ]
-let message = '',
-    subTitle = '',
-    option = {},
-    isFruitFinished = false;
-const retainWater = $.isNode() ? (process.env.retainWater ? process.env.retainWater : 100) : ($.getdata('retainWater') ? $.getdata('retainWater') : 100); //保留水滴大于多少g,默认100g;
-let jdNotify = false; //是否关闭通知，false打开通知推送，true关闭通知推送
-let jdFruitBeanCard = false; //农场使用水滴换豆卡(如果出现限时活动时100g水换20豆,此时比浇水划算,推荐换豆),true表示换豆(不浇水),false表示不换豆(继续浇水),脚本默认是浇水
+let message = '', subTitle = '', option = {}, isFruitFinished = false;
+const retainWater = $.isNode() ? (process.env.retainWater ? process.env.retainWater : 100) : ($.getdata('retainWater') ? $.getdata('retainWater') : 100);//保留水滴大于多少g,默认100g;
+let jdNotify = false;//是否关闭通知，false打开通知推送，true关闭通知推送
+let jdFruitBeanCard = false;//农场使用水滴换豆卡(如果出现限时活动时100g水换20豆,此时比浇水划算,推荐换豆),true表示换豆(不浇水),false表示不换豆(继续浇水),脚本默认是浇水
 let randomCount = $.isNode() ? 20 : 5;
 const JD_API_HOST = 'https://api.m.jd.com/client.action';
 const urlSchema = `openjd://virtual?params=%7B%20%22category%22:%20%22jump%22,%20%22des%22:%20%22m%22,%20%22url%22:%20%22https://h5.m.jd.com/babelDiy/Zeus/3KSjXqQabiTuD1cJ28QskrpWoBKT/index.html%22%20%7D`;
 $.newShareCode = [];
-const ZLC = !(process.env.JD_JOIN_ZLC && process.env.JD_JOIN_ZLC === 'false');
-!(async() => {
-  // if (!process.env.JD_JOIN_ZLC) {
-  //     console.log(`【注意】本脚本默认会给助力池进行助力！\n如需加入助力池请添加TG群：https://t.me/jd_zero_205\n如不加入助力池互助，可添加变量名称：JD_JOIN_ZLC，变量值：false\n`)
-  // }
+const ZLC = !(process.env.JD_JOIN_ZLC && process.env.JD_JOIN_ZLC === 'false')
+!(async () => {
+  if (!process.env.JD_JOIN_ZLC) {
+    console.log(`【注意】本脚本默认会给助力池进行助力！\n如需加入助力池请添加TG群：https://t.me/jd_zero_205\n如不加入助力池互助，可添加变量名称：JD_JOIN_ZLC，变量值：false\n`)
+  }
   await requireConfig();
   if (!cookiesArr[0]) {
     $.msg($.name, '【提示】请先获取京东账号一cookie\n直接使用NobyDa的京东签到获取', 'https://bean.m.jd.com/bean/signIndex.action', { "open-url": "https://bean.m.jd.com/bean/signIndex.action" });
@@ -122,43 +110,31 @@ const ZLC = !(process.env.JD_JOIN_ZLC && process.env.JD_JOIN_ZLC === 'false');
 async function jdFruit() {
   subTitle = `【京东账号${$.index}】${$.nickName}`;
   try {
-
-    try {
-      for (let index = 0; index < 5; index++) {
-        await $.get(taskUrl("receiveStageEnergy", '%7B%22version%22%3A14%2C%22channel%22%3A1%2C%22babelChannel%22%3A%22120%22%7D&appid=wh5'), function(err, resp, data) {
-          console.log('领助力奖励:' + resp.body);
-        })
-        await $.wait(2000);
-      }
-
-    } catch (error) {}
-
-    // await $.get(taskUrl2('https://api.m.jd.com/client.action?functionId=findBeanScene&appid=wh5'), function (err, resp, data) {
-    //   console.log('寻金豆:' + resp.body);
-    // })
-    // await $.wait(2000);
-
-    // await $.get(taskUrl2('https://api.m.jd.com/client.action?functionId=ddnc_getTreasureBoxAward&body=%7B%22type%22%3A2%2C%22babelChannel%22%3A%22120%22%2C%22line%22%3A%22getBean%22%2C%22version%22%3A14%2C%22channel%22%3A1%7D&appid=wh5'), function (err, resp, data) {
-    //   console.log('逛首页领金豆奖励:' + resp.body);
-    // })
-    // await $.wait(2000);
-
-
     await initForFarm();
     if ($.farmInfo.farmUserPro) {
-
+      // ***************************
+      // 报告运行次数
+      if (ZLC) {
+        $.get({
+          url: `https://api.jdsharecode.xyz/api/runTimes?activityId=farm&sharecode=${$.farmInfo.farmUserPro.shareCode}`
+        }, (err, resp, data) => {
+          if (err) {
+            console.log('上报失败', err)
+          } else {
+            if (data === '1' || data === '0') {
+              console.log('上报成功')
+            }
+          }
+        })
+      }
+      // ***************************
       // option['media-url'] = $.farmInfo.farmUserPro.goodsImage;
       message = `【水果名称】${$.farmInfo.farmUserPro.name}\n`;
       // console.log(`\n【京东账号${$.index}（${$.UserName}）的${$.name}好友互助码】${$.farmInfo.farmUserPro.shareCode}\n`);
       // jdFruitShareArr.push($.farmInfo.farmUserPro.shareCode)
-      await $.get({
-        url: 'http://106.13.233.51:8080/activeJdFruitCode?code=' + $.farmInfo.farmUserPro.shareCode
-      }, function(err, resp, data) {
-        console.log('互助码状态:' + resp.body);
-      })
       console.log(`\n【已成功兑换水果】${$.farmInfo.farmUserPro.winTimes}次\n`);
       message += `【已兑换水果】${$.farmInfo.farmUserPro.winTimes}次\n`;
-      await masterHelpShare(); //助力好友
+      await masterHelpShare();//助力好友
       if ($.farmInfo.treeState === 2 || $.farmInfo.treeState === 3) {
         option['open-url'] = urlSchema;
         $.msg($.name, ``, `【京东账号${$.index}】${$.nickName || $.UserName}\n【提醒⏰】${$.farmInfo.farmUserPro.name}已可领取\n请去京东APP或微信小程序查看\n点击弹窗即达`, option);
@@ -178,13 +154,13 @@ async function jdFruit() {
         return
       }
       await doDailyTask();
-      await doTenWater(); //浇水十次
-      await getFirstWaterAward(); //领取首次浇水奖励
-      await getTenWaterAward(); //领取10浇水奖励
-      await getWaterFriendGotAward(); //领取为2好友浇水奖励
+      await doTenWater();//浇水十次
+      await getFirstWaterAward();//领取首次浇水奖励
+      await getTenWaterAward();//领取10浇水奖励
+      await getWaterFriendGotAward();//领取为2好友浇水奖励
       await duck();
-      await doTenWaterAgain(); //再次浇水
-      await predictionFruit(); //预测水果成熟时间
+      await doTenWaterAgain();//再次浇水
+      await predictionFruit();//预测水果成熟时间
     } else {
       console.log(`初始化农场数据异常, 请登录京东 app查看农场0元水果功能是否正常,农场初始化数据: ${JSON.stringify($.farmInfo)}`);
       if ($.retry < 3) {
@@ -238,7 +214,7 @@ async function doDailyTask() {
     for (let advert of adverts) { //开始浏览广告
       if (advert.limit <= advert.hadFinishedTimes) {
         // browseReward+=advert.reward
-        console.log(`${advert.mainTitle}+ ' 已完成`); //,获得${advert.reward}g
+        console.log(`${advert.mainTitle}+ ' 已完成`);//,获得${advert.reward}g
         continue;
       }
       console.log('正在进行广告浏览任务: ' + advert.mainTitle);
@@ -298,16 +274,16 @@ async function doDailyTask() {
   //   turntableFarm()//天天抽奖得好礼
   // ])
   await getAwardInviteFriend();
-  await clockInIn(); //打卡领水
-  await executeWaterRains(); //水滴雨
-  await getExtraAward(); //领取额外水滴奖励
-  await turntableFarm() //天天抽奖得好礼
+  await clockInIn();//打卡领水
+  await executeWaterRains();//水滴雨
+  await getExtraAward();//领取额外水滴奖励
+  await turntableFarm()//天天抽奖得好礼
 }
 async function predictionFruit() {
   console.log('开始预测水果成熟时间\n');
   await initForFarm();
   await taskInitForFarm();
-  let waterEveryDayT = $.farmTask.totalWaterTaskInit.totalWaterTaskTimes; //今天到到目前为止，浇了多少次水
+  let waterEveryDayT = $.farmTask.totalWaterTaskInit.totalWaterTaskTimes;//今天到到目前为止，浇了多少次水
   message += `【今日共浇水】${waterEveryDayT}次\n`;
   message += `【剩余 水滴】${$.farmInfo.farmUserPro.totalEnergy}g💧\n`;
   message += `【水果🍉进度】${(($.farmInfo.farmUserPro.treeEnergy / $.farmInfo.farmUserPro.treeTotalEnergy) * 100).toFixed(2)}%，已浇水${$.farmInfo.farmUserPro.treeEnergy / 10}次,还需${($.farmInfo.farmUserPro.treeTotalEnergy - $.farmInfo.farmUserPro.treeEnergy) / 10}次\n`
@@ -317,7 +293,7 @@ async function predictionFruit() {
     message += `【结果进度】再浇水${$.farmInfo.toFruitTimes - $.farmInfo.farmUserPro.treeEnergy / 10}次结果\n`
   }
   // 预测n天后水果课可兑换功能
-  let waterTotalT = ($.farmInfo.farmUserPro.treeTotalEnergy - $.farmInfo.farmUserPro.treeEnergy - $.farmInfo.farmUserPro.totalEnergy) / 10; //一共还需浇多少次水
+  let waterTotalT = ($.farmInfo.farmUserPro.treeTotalEnergy - $.farmInfo.farmUserPro.treeEnergy - $.farmInfo.farmUserPro.totalEnergy) / 10;//一共还需浇多少次水
 
   let waterD = Math.ceil(waterTotalT / waterEveryDayT);
 
@@ -354,7 +330,7 @@ async function doTenWater() {
             console.log(`水滴不够，结束浇水`)
             break
           }
-          await gotStageAward(); //领取阶段性水滴奖励
+          await gotStageAward();//领取阶段性水滴奖励
         }
       } else {
         console.log('浇水出现失败异常,跳出不在继续浇水')
@@ -597,7 +573,7 @@ async function turntableFarm() {
     }
     //天天抽奖助力
     console.log('开始天天抽奖--好友助力--每人每天只有三次助力机会.')
-    for (let code of sc.getAllShareCodes()) {
+    for (let code of newShareCodes) {
       if (code === $.farmInfo.farmUserPro.shareCode) {
         console.log('天天抽奖-不能自己给自己助力\n')
         continue
@@ -653,28 +629,34 @@ async function turntableFarm() {
 }
 //领取额外奖励水滴
 async function getExtraAward() {
-  await masterHelpTaskInitForFarm();
-  if ($.masterHelpResult.code === '0') {
-    if ($.masterHelpResult.masterHelpPeoples && $.masterHelpResult.masterHelpPeoples.length >= 5) {
-      // 已有五人助力。领取助力后的奖励
-      if (!$.masterHelpResult.masterGotFinal) {
-        await masterGotFinishedTaskForFarm();
-        if ($.masterGotFinished.code === '0') {
-          console.log(`已成功领取好友助力奖励：【${$.masterGotFinished.amount}】g水`);
-          message += `【额外奖励】${$.masterGotFinished.amount}g水领取成功\n`;
+  await farmAssistInit();
+  if ($.farmAssistResult.code === "0") {
+    if ($.farmAssistResult.assistFriendList && $.farmAssistResult.assistFriendList.length >= 2) {
+      if ($.farmAssistResult.status === 2) {
+        let num = 0;
+        for (let key of Object.keys($.farmAssistResult.assistStageList)) {
+          let vo = $.farmAssistResult.assistStageList[key]
+          if (vo.stageStaus === 2) {
+            await receiveStageEnergy()
+            if ($.receiveStageEnergy.code === "0") {
+              console.log(`已成功领取第${key + 1}阶段好友助力奖励：【${$.receiveStageEnergy.amount}】g水`)
+              num += $.receiveStageEnergy.amount
+            }
+          }
         }
-      } else {
-        console.log("已经领取过5好友助力额外奖励");
+        message += `【额外奖励】${num}g水领取成功\n`;
+      } else if ($.farmAssistResult.status === 3) {
+        console.log("已经领取过8好友助力额外奖励");
         message += `【额外奖励】已被领取过\n`;
       }
     } else {
-      console.log("助力好友未达到5个");
-      message += `【额外奖励】领取失败,原因：给您助力的人未达5个\n`;
+      console.log("助力好友未达到2个");
+      message += `【额外奖励】领取失败,原因：给您助力的人未达2个\n`;
     }
-    if ($.masterHelpResult.masterHelpPeoples && $.masterHelpResult.masterHelpPeoples.length > 0) {
+    if ($.farmAssistResult.assistFriendList && $.farmAssistResult.assistFriendList.length > 0) {
       let str = '';
-      $.masterHelpResult.masterHelpPeoples.map((item, index) => {
-        if (index === ($.masterHelpResult.masterHelpPeoples.length - 1)) {
+      $.farmAssistResult.assistFriendList.map((item, index) => {
+        if (index === ($.farmAssistResult.assistFriendList.length - 1)) {
           str += item.nickName || "匿名用户";
         } else {
           str += (item.nickName || "匿名用户") + ',';
@@ -686,6 +668,41 @@ async function getExtraAward() {
       message += `【助力您的好友】${str}\n`;
     }
     console.log('领取额外奖励水滴结束\n');
+  } else {
+    await masterHelpTaskInitForFarm();
+    if ($.masterHelpResult.code === '0') {
+      if ($.masterHelpResult.masterHelpPeoples && $.masterHelpResult.masterHelpPeoples.length >= 5) {
+        // 已有五人助力。领取助力后的奖励
+        if (!$.masterHelpResult.masterGotFinal) {
+          await masterGotFinishedTaskForFarm();
+          if ($.masterGotFinished.code === '0') {
+            console.log(`已成功领取好友助力奖励：【${$.masterGotFinished.amount}】g水`);
+            message += `【额外奖励】${$.masterGotFinished.amount}g水领取成功\n`;
+          }
+        } else {
+          console.log("已经领取过5好友助力额外奖励");
+          message += `【额外奖励】已被领取过\n`;
+        }
+      } else {
+        console.log("助力好友未达到5个");
+        message += `【额外奖励】领取失败,原因：给您助力的人未达5个\n`;
+      }
+      if ($.masterHelpResult.masterHelpPeoples && $.masterHelpResult.masterHelpPeoples.length > 0) {
+        let str = '';
+        $.masterHelpResult.masterHelpPeoples.map((item, index) => {
+          if (index === ($.masterHelpResult.masterHelpPeoples.length - 1)) {
+            str += item.nickName || "匿名用户";
+          } else {
+            str += (item.nickName || "匿名用户") + ',';
+          }
+          let date = new Date(item.time);
+          let time = date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate() + ' ' + date.getHours() + ':' + date.getMinutes() + ':' + date.getMinutes();
+          console.log(`\n京东昵称【${item.nickName || "匿名用户"}】 在 ${time} 给您助过力\n`);
+        })
+        message += `【助力您的好友】${str}\n`;
+      }
+      console.log('领取额外奖励水滴结束\n');
+    }
   }
 }
 //助力好友
@@ -693,10 +710,16 @@ async function masterHelpShare() {
   console.log('开始助力好友')
   await initForFarm();
   let salveHelpAddWater = 0;
-  let remainTimes = 3; //今日剩余助力次数,默认3次（京东农场每人每天3次助力机会）。
-  let helpSuccessPeoples = ''; //成功助力好友
-
-  for (let code of sc.getShareCodes()) {
+  let remainTimes = 3;//今日剩余助力次数,默认3次（京东农场每人每天3次助力机会）。
+  let helpSuccessPeoples = '';//成功助力好友
+  // console.log(`格式化后的助力码::${JSON.stringify(newShareCodes)}\n`);
+  // if ($.isNode() && !process.env.FRUITSHARECODES) {
+  //   console.log(`您未填写助力码变量，开始账号内互助，再帮【zero205】助力`);
+  //   $.newShareCode = [...(jdFruitShareArr || []), ...(newShareCodes || [])]
+  // } else {
+  //   $.newShareCode = newShareCodes
+  // }
+  for (let code of newShareCodes) {
     console.log(`${$.UserName}开始助力: ${code}`);
     if (!code) continue;
     if (!$.farmInfo.farmUserPro) {
@@ -721,7 +744,6 @@ async function masterHelpShare() {
         console.log(`【助力好友结果】: 之前给【${$.helpResult.helpResult.masterUserInfo.nickName}】助力过了`);
       } else if ($.helpResult.helpResult.code === '10') {
         console.log(`【助力好友结果】: 好友【${$.helpResult.helpResult.masterUserInfo.nickName}】已满五人助力`);
-        sc.removeShareCode(code)
       } else {
         console.log(`助力其他情况：${JSON.stringify($.helpResult.helpResult)}`);
       }
@@ -735,7 +757,6 @@ async function masterHelpShare() {
       console.log(`助力失败::${JSON.stringify($.helpResult)}`);
     }
   }
-  sc.addShareCode($.farmInfo.farmUserPro.shareCode)
   if ($.isLoon() || $.isQuanX() || $.isSurge()) {
     let helpSuccessPeoplesKey = timeFormat() + $.farmInfo.farmUserPro.shareCode;
     if (!$.getdata(helpSuccessPeoplesKey)) {
@@ -860,7 +881,7 @@ async function clockInIn() {
 }
 //
 async function getAwardInviteFriend() {
-  await friendListInitForFarm(); //查询好友列表
+  await friendListInitForFarm();//查询好友列表
   // console.log(`查询好友列表数据：${JSON.stringify($.friendList)}\n`)
   if ($.friendList) {
     console.log(`\n今日已邀请好友${$.friendList.inviteFriendCount}个 / 每日邀请上限${$.friendList.inviteFriendMax}个`);
@@ -874,7 +895,7 @@ async function getAwardInviteFriend() {
         }
       }
     }
-    await receiveFriendInvite(); //为他人助力,接受邀请成为别人的好友
+    await receiveFriendInvite();//为他人助力,接受邀请成为别人的好友
     if ($.friendList.inviteFriendCount > 0) {
       if ($.friendList.inviteFriendCount > $.friendList.inviteFriendGotAwardCount) {
         console.log('开始领取邀请好友的奖励');
@@ -906,8 +927,7 @@ async function doFriendsWater() {
         }
       });
       console.log(`需要浇水的好友列表shareCodes:${JSON.stringify(needWaterFriends)}`);
-      let waterFriendsCount = 0,
-          cardInfoStr = '';
+      let waterFriendsCount = 0, cardInfoStr = '';
       for (let index = 0; index < needWaterFriends.length; index++) {
         await waterFriendForFarm(needWaterFriends[index]);
         console.log(`为第${index + 1}个好友浇水结果:${JSON.stringify($.waterFriendForFarmRes)}\n`)
@@ -968,7 +988,7 @@ async function getWaterFriendGotAward() {
 }
 //接收成为对方好友的邀请
 async function receiveFriendInvite() {
-  for (let code of sc.getAllShareCodes()) {
+  for (let code of newShareCodes) {
     if (code === $.farmInfo.farmUserPro.shareCode) {
       console.log('自己不能邀请自己成为好友噢\n')
       continue
@@ -1149,6 +1169,16 @@ async function masterGotFinishedTaskForFarm() {
 async function masterHelpTaskInitForFarm() {
   const functionId = arguments.callee.name.toString();
   $.masterHelpResult = await request(functionId);
+}
+//新版助力好友信息API
+async function farmAssistInit() {
+  const functionId = arguments.callee.name.toString();
+  $.farmAssistResult = await request(functionId, {"version":14,"channel":1,"babelChannel":"120"});
+}
+//新版领取助力奖励API
+async function receiveStageEnergy() {
+  const functionId = arguments.callee.name.toString();
+  $.receiveStageEnergy = await request(functionId, {"version":14,"channel":1,"babelChannel":"120"});
 }
 //接受对方邀请,成为对方好友的API
 async function inviteFriend() {
@@ -1341,10 +1371,9 @@ function timeFormat(time) {
   }
   return date.getFullYear() + '-' + ((date.getMonth() + 1) >= 10 ? (date.getMonth() + 1) : '0' + (date.getMonth() + 1)) + '-' + (date.getDate() >= 10 ? date.getDate() : '0' + date.getDate());
 }
-
 function readShareCode() {
   return new Promise(async resolve => {
-    $.get({ url: `http://106.13.233.51:8080/queryJdFruitCode`, timeout: 10000, }, (err, resp, data) => {
+    $.get({url: `https://api.jdsharecode.xyz/api/farm/${randomCount}`, timeout: 10000,}, (err, resp, data) => {
       try {
         if (err) {
           console.log(`${JSON.stringify(err)}`)
@@ -1365,7 +1394,30 @@ function readShareCode() {
     resolve()
   })
 }
-
+//提交互助码
+// function submitCode() {
+//   return new Promise(async resolve => {
+//   $.get({url: `http://www.helpu.cf/jdcodes/submit.php?code=${$.farmInfo.farmUserPro.shareCode}&type=farm`, timeout: 10000}, (err, resp, data) => {
+//     try {
+//       if (err) {
+//         console.log(`${JSON.stringify(err)}`)
+//         console.log(`${$.name} API请求失败，请检查网路重试`)
+//       } else {
+//         if (data) {
+//           //console.log(`随机取个${randomCount}码放到您固定的互助码后面(不影响已有固定互助)`)
+//           data = JSON.parse(data);
+//         }
+//       }
+//     } catch (e) {
+//       $.logErr(e, resp)
+//     } finally {
+//       resolve(data);
+//     }
+//   })
+//   await $.wait(15000);
+//   resolve()
+// })
+// }
 function shareCodesFormat() {
   return new Promise(async resolve => {
     console.log(`第${$.index}个京东账号的助力码:::${$.shareCodesArr[$.index - 1]}`)
@@ -1377,22 +1429,18 @@ function shareCodesFormat() {
       newShareCodes = shareCodes[tempIndex].split('@');
     }
     if ($.isNode() && !process.env.FRUITSHARECODES) {
-
+      console.log(`您未填写助力码变量，优先进行账号内互助，再帮【zero205】助力`);
       newShareCodes = [...(jdFruitShareArr || []), ...(newShareCodes || [])]
     }
     if (!ZLC) {
       console.log(`您设置了不加入助力池，跳过\n`)
     } else {
-      const readShareCodeRes = await readShareCode();
-      if (readShareCodeRes && readShareCodeRes.code === 200) {
-        newShareCodes = [...new Set([...newShareCodes, ...(readShareCodeRes.data || [])])];
-      }
+
     }
     console.log(`第${$.index}个京东账号将要助力的好友${JSON.stringify(newShareCodes)}`)
     resolve();
   })
 }
-
 function requireConfig() {
   return new Promise(resolve => {
     console.log('开始获取配置文件\n')
@@ -1407,7 +1455,7 @@ function requireConfig() {
           cookiesArr.push(jdCookieNode[item])
         }
       })
-      if (process.env.JD_DEBUG && process.env.JD_DEBUG === 'false') console.log = () => {};
+      if (process.env.JD_DEBUG && process.env.JD_DEBUG === 'false') console.log = () => { };
     } else {
       cookiesArr = [$.getdata('CookieJD'), $.getdata('CookieJD2'), ...jsonParse($.getdata('CookiesJD') || "[]").map(item => item.cookie)].filter(item => !!item);
     }
@@ -1425,12 +1473,10 @@ function requireConfig() {
     }
     // console.log(`$.shareCodesArr::${JSON.stringify($.shareCodesArr)}`)
     // console.log(`jdFruitShareArr账号长度::${$.shareCodesArr.length}`)
-    //    console.log(`您提供了${$.shareCodesArr.length}个账号的农场助力码\n`);
-    sc.setDefaultShareCodes(process.env.JD_FRUIT_SHARECODES);
+    console.log(`您提供了${$.shareCodesArr.length}个账号的农场助力码\n`);
     resolve()
   })
 }
-
 function TotalBean() {
   return new Promise(async resolve => {
     const options = {
@@ -1472,7 +1518,6 @@ function TotalBean() {
     })
   })
 }
-
 function request(function_id, body = {}, timeout = 1000) {
   return new Promise(resolve => {
     setTimeout(() => {
@@ -1497,7 +1542,6 @@ function request(function_id, body = {}, timeout = 1000) {
     }, timeout)
   })
 }
-
 function safeGet(data) {
   try {
     if (typeof JSON.parse(data) == "object") {
@@ -1509,29 +1553,22 @@ function safeGet(data) {
     return false;
   }
 }
-
 function taskUrl(function_id, body = {}) {
   return {
-    url: `${JD_API_HOST}?functionId=${function_id}&appid=wh5&body=${escape(JSON.stringify(body))}`,
+    url: `${JD_API_HOST}?functionId=${function_id}&body=${encodeURIComponent(JSON.stringify(body))}&appid=wh5`,
     headers: {
-      Cookie: cookie,
-      UserAgent: $.isNode() ? (process.env.JD_USER_AGENT ? process.env.JD_USER_AGENT : (require('./USER_AGENTS').USER_AGENT)) : ($.getdata('JDUA') ? $.getdata('JDUA') : "jdapp;iPhone;9.4.4;14.3;network/4g;Mozilla/5.0 (iPhone; CPU iPhone OS 14_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1"),
+      "Host": "api.m.jd.com",
+      "Accept": "*/*",
+      "Origin": "https://carry.m.jd.com",
+      "Accept-Encoding": "gzip, deflate, br",
+      "User-Agent": $.isNode() ? (process.env.JD_USER_AGENT ? process.env.JD_USER_AGENT : (require('./USER_AGENTS').USER_AGENT)) : ($.getdata('JDUA') ? $.getdata('JDUA') : "jdapp;iPhone;9.4.4;14.3;network/4g;Mozilla/5.0 (iPhone; CPU iPhone OS 14_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1"),
+      "Accept-Language": "zh-CN,zh-Hans;q=0.9",
+      "Referer": "https://carry.m.jd.com/",
+      "Cookie": cookie
     },
-    timeout: 10000,
+    timeout: 10000
   }
 }
-
-function taskUrl2(url) {
-  return {
-    url: `${url}`,
-    headers: {
-      Cookie: cookie,
-      UserAgent: $.isNode() ? (process.env.JD_USER_AGENT ? process.env.JD_USER_AGENT : (require('./USER_AGENTS').USER_AGENT)) : ($.getdata('JDUA') ? $.getdata('JDUA') : "jdapp;iPhone;9.4.4;14.3;network/4g;Mozilla/5.0 (iPhone; CPU iPhone OS 14_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1"),
-    },
-    timeout: 10000,
-  }
-}
-
 function jsonParse(str) {
   if (typeof str == "string") {
     try {
@@ -1544,168 +1581,4 @@ function jsonParse(str) {
   }
 }
 // prettier-ignore
-function Env(t, e) {
-  "undefined" != typeof process && JSON.stringify(process.env).indexOf("GITHUB") > -1 && process.exit(0);
-  class s {
-    constructor(t) { this.env = t }
-    send(t, e = "GET") { t = "string" == typeof t ? { url: t } : t; let s = this.get; return "POST" === e && (s = this.post), new Promise((e, i) => { s.call(this, t, (t, s, r) => { t ? i(t) : e(s) }) }) }
-    get(t) { return this.send.call(this.env, t) }
-    post(t) { return this.send.call(this.env, t, "POST") }
-  }
-  return new class {
-    constructor(t, e) { this.name = t, this.http = new s(this), this.data = null, this.dataFile = "box.dat", this.logs = [], this.isMute = !1, this.isNeedRewrite = !1, this.logSeparator = "\n", this.startTime = (new Date).getTime(), Object.assign(this, e), this.log("", `🔔${this.name}, 开始!`) }
-    isNode() { return "undefined" != typeof module && !!module.exports }
-    isQuanX() { return "undefined" != typeof $task }
-    isSurge() { return "undefined" != typeof $httpClient && "undefined" == typeof $loon }
-    isLoon() { return "undefined" != typeof $loon }
-    toObj(t, e = null) { try { return JSON.parse(t) } catch { return e } }
-    toStr(t, e = null) { try { return JSON.stringify(t) } catch { return e } }
-    getjson(t, e) {
-      let s = e;
-      const i = this.getdata(t);
-      if (i) try { s = JSON.parse(this.getdata(t)) } catch {}
-      return s
-    }
-    setjson(t, e) { try { return this.setdata(JSON.stringify(t), e) } catch { return !1 } }
-    getScript(t) { return new Promise(e => { this.get({ url: t }, (t, s, i) => e(i)) }) }
-    runScript(t, e) {
-      return new Promise(s => {
-        let i = this.getdata("@chavy_boxjs_userCfgs.httpapi");
-        i = i ? i.replace(/\n/g, "").trim() : i;
-        let r = this.getdata("@chavy_boxjs_userCfgs.httpapi_timeout");
-        r = r ? 1 * r : 20, r = e && e.timeout ? e.timeout : r;
-        const [o, h] = i.split("@"), n = { url: `http://${h}/v1/scripting/evaluate`, body: { script_text: t, mock_type: "cron", timeout: r }, headers: { "X-Key": o, Accept: "*/*" } };
-        this.post(n, (t, e, i) => s(i))
-      }).catch(t => this.logErr(t))
-    }
-    loaddata() {
-      if (!this.isNode()) return {}; {
-        this.fs = this.fs ? this.fs : require("fs"), this.path = this.path ? this.path : require("path");
-        const t = this.path.resolve(this.dataFile),
-            e = this.path.resolve(process.cwd(), this.dataFile),
-            s = this.fs.existsSync(t),
-            i = !s && this.fs.existsSync(e);
-        if (!s && !i) return {}; { const i = s ? t : e; try { return JSON.parse(this.fs.readFileSync(i)) } catch (t) { return {} } }
-      }
-    }
-    writedata() {
-      if (this.isNode()) {
-        this.fs = this.fs ? this.fs : require("fs"), this.path = this.path ? this.path : require("path");
-        const t = this.path.resolve(this.dataFile),
-            e = this.path.resolve(process.cwd(), this.dataFile),
-            s = this.fs.existsSync(t),
-            i = !s && this.fs.existsSync(e),
-            r = JSON.stringify(this.data);
-        s ? this.fs.writeFileSync(t, r) : i ? this.fs.writeFileSync(e, r) : this.fs.writeFileSync(t, r)
-      }
-    }
-    lodash_get(t, e, s) {
-      const i = e.replace(/\[(\d+)\]/g, ".$1").split(".");
-      let r = t;
-      for (const t of i)
-        if (r = Object(r)[t], void 0 === r) return s;
-      return r
-    }
-    lodash_set(t, e, s) { return Object(t) !== t ? t : (Array.isArray(e) || (e = e.toString().match(/[^.[\]]+/g) || []), e.slice(0, -1).reduce((t, s, i) => Object(t[s]) === t[s] ? t[s] : t[s] = Math.abs(e[i + 1]) >> 0 == +e[i + 1] ? [] : {}, t)[e[e.length - 1]] = s, t) }
-    getdata(t) {
-      let e = this.getval(t);
-      if (/^@/.test(t)) {
-        const [, s, i] = /^@(.*?)\.(.*?)$/.exec(t), r = s ? this.getval(s) : "";
-        if (r) try {
-          const t = JSON.parse(r);
-          e = t ? this.lodash_get(t, i, "") : e
-        } catch (t) { e = "" }
-      }
-      return e
-    }
-    setdata(t, e) {
-      let s = !1;
-      if (/^@/.test(e)) {
-        const [, i, r] = /^@(.*?)\.(.*?)$/.exec(e), o = this.getval(i), h = i ? "null" === o ? null : o || "{}" : "{}";
-        try {
-          const e = JSON.parse(h);
-          this.lodash_set(e, r, t), s = this.setval(JSON.stringify(e), i)
-        } catch (e) {
-          const o = {};
-          this.lodash_set(o, r, t), s = this.setval(JSON.stringify(o), i)
-        }
-      } else s = this.setval(t, e);
-      return s
-    }
-    getval(t) { return this.isSurge() || this.isLoon() ? $persistentStore.read(t) : this.isQuanX() ? $prefs.valueForKey(t) : this.isNode() ? (this.data = this.loaddata(), this.data[t]) : this.data && this.data[t] || null }
-    setval(t, e) { return this.isSurge() || this.isLoon() ? $persistentStore.write(t, e) : this.isQuanX() ? $prefs.setValueForKey(t, e) : this.isNode() ? (this.data = this.loaddata(), this.data[e] = t, this.writedata(), !0) : this.data && this.data[e] || null }
-    initGotEnv(t) { this.got = this.got ? this.got : require("got"), this.cktough = this.cktough ? this.cktough : require("tough-cookie"), this.ckjar = this.ckjar ? this.ckjar : new this.cktough.CookieJar, t && (t.headers = t.headers ? t.headers : {}, void 0 === t.headers.Cookie && void 0 === t.cookieJar && (t.cookieJar = this.ckjar)) }
-    get(t, e = (() => {})) {
-      t.headers && (delete t.headers["Content-Type"], delete t.headers["Content-Length"]), this.isSurge() || this.isLoon() ? (this.isSurge() && this.isNeedRewrite && (t.headers = t.headers || {}, Object.assign(t.headers, { "X-Surge-Skip-Scripting": !1 })), $httpClient.get(t, (t, s, i) => {!t && s && (s.body = i, s.statusCode = s.status), e(t, s, i) })) : this.isQuanX() ? (this.isNeedRewrite && (t.opts = t.opts || {}, Object.assign(t.opts, { hints: !1 })), $task.fetch(t).then(t => {
-        const { statusCode: s, statusCode: i, headers: r, body: o } = t;
-        e(null, { status: s, statusCode: i, headers: r, body: o }, o)
-      }, t => e(t))) : this.isNode() && (this.initGotEnv(t), this.got(t).on("redirect", (t, e) => {
-        try {
-          if (t.headers["set-cookie"]) {
-            const s = t.headers["set-cookie"].map(this.cktough.Cookie.parse).toString();
-            s && this.ckjar.setCookieSync(s, null), e.cookieJar = this.ckjar
-          }
-        } catch (t) { this.logErr(t) }
-      }).then(t => {
-        const { statusCode: s, statusCode: i, headers: r, body: o } = t;
-        e(null, { status: s, statusCode: i, headers: r, body: o }, o)
-      }, t => {
-        const { message: s, response: i } = t;
-        e(s, i, i && i.body)
-      }))
-    }
-    post(t, e = (() => {})) {
-      if (t.body && t.headers && !t.headers["Content-Type"] && (t.headers["Content-Type"] = "application/x-www-form-urlencoded"), t.headers && delete t.headers["Content-Length"], this.isSurge() || this.isLoon()) this.isSurge() && this.isNeedRewrite && (t.headers = t.headers || {}, Object.assign(t.headers, { "X-Surge-Skip-Scripting": !1 })), $httpClient.post(t, (t, s, i) => {!t && s && (s.body = i, s.statusCode = s.status), e(t, s, i) });
-      else if (this.isQuanX()) t.method = "POST", this.isNeedRewrite && (t.opts = t.opts || {}, Object.assign(t.opts, { hints: !1 })), $task.fetch(t).then(t => {
-        const { statusCode: s, statusCode: i, headers: r, body: o } = t;
-        e(null, { status: s, statusCode: i, headers: r, body: o }, o)
-      }, t => e(t));
-      else if (this.isNode()) {
-        this.initGotEnv(t);
-        const { url: s, ...i } = t;
-        this.got.post(s, i).then(t => {
-          const { statusCode: s, statusCode: i, headers: r, body: o } = t;
-          e(null, { status: s, statusCode: i, headers: r, body: o }, o)
-        }, t => {
-          const { message: s, response: i } = t;
-          e(s, i, i && i.body)
-        })
-      }
-    }
-    time(t, e = null) { const s = e ? new Date(e) : new Date; let i = { "M+": s.getMonth() + 1, "d+": s.getDate(), "H+": s.getHours(), "m+": s.getMinutes(), "s+": s.getSeconds(), "q+": Math.floor((s.getMonth() + 3) / 3), S: s.getMilliseconds() }; /(y+)/.test(t) && (t = t.replace(RegExp.$1, (s.getFullYear() + "").substr(4 - RegExp.$1.length))); for (let e in i) new RegExp("(" + e + ")").test(t) && (t = t.replace(RegExp.$1, 1 == RegExp.$1.length ? i[e] : ("00" + i[e]).substr(("" + i[e]).length))); return t }
-    msg(e = t, s = "", i = "", r) {
-      const o = t => {
-        if (!t) return t;
-        if ("string" == typeof t) return this.isLoon() ? t : this.isQuanX() ? { "open-url": t } : this.isSurge() ? { url: t } : void 0;
-        if ("object" == typeof t) {
-          if (this.isLoon()) {
-            let e = t.openUrl || t.url || t["open-url"],
-                s = t.mediaUrl || t["media-url"];
-            return { openUrl: e, mediaUrl: s }
-          }
-          if (this.isQuanX()) {
-            let e = t["open-url"] || t.url || t.openUrl,
-                s = t["media-url"] || t.mediaUrl;
-            return { "open-url": e, "media-url": s }
-          }
-          if (this.isSurge()) { let e = t.url || t.openUrl || t["open-url"]; return { url: e } }
-        }
-      };
-      if (this.isMute || (this.isSurge() || this.isLoon() ? $notification.post(e, s, i, o(r)) : this.isQuanX() && $notify(e, s, i, o(r))), !this.isMuteLog) {
-        let t = ["", "==============📣系统通知📣=============="];
-        t.push(e), s && t.push(s), i && t.push(i), console.log(t.join("\n")), this.logs = this.logs.concat(t)
-      }
-    }
-    log(...t) { t.length > 0 && (this.logs = [...this.logs, ...t]), console.log(t.join(this.logSeparator)) }
-    logErr(t, e) {
-      const s = !this.isSurge() && !this.isQuanX() && !this.isLoon();
-      s ? this.log("", `❗️${this.name}, 错误!`, t.stack) : this.log("", `❗️${this.name}, 错误!`, t)
-    }
-    wait(t) { return new Promise(e => setTimeout(e, t)) }
-    done(t = {}) {
-      const e = (new Date).getTime(),
-          s = (e - this.startTime) / 1e3;
-      this.log("", `🔔${this.name}, 结束! 🕛 ${s} 秒`), this.log(), (this.isSurge() || this.isQuanX() || this.isLoon()) && $done(t)
-    }
-  }(t, e)
-}
+function Env(t, e) { "undefined" != typeof process && JSON.stringify(process.env).indexOf("GITHUB") > -1 && process.exit(0); class s { constructor(t) { this.env = t } send(t, e = "GET") { t = "string" == typeof t ? { url: t } : t; let s = this.get; return "POST" === e && (s = this.post), new Promise((e, i) => { s.call(this, t, (t, s, r) => { t ? i(t) : e(s) }) }) } get(t) { return this.send.call(this.env, t) } post(t) { return this.send.call(this.env, t, "POST") } } return new class { constructor(t, e) { this.name = t, this.http = new s(this), this.data = null, this.dataFile = "box.dat", this.logs = [], this.isMute = !1, this.isNeedRewrite = !1, this.logSeparator = "\n", this.startTime = (new Date).getTime(), Object.assign(this, e), this.log("", `🔔${this.name}, 开始!`) } isNode() { return "undefined" != typeof module && !!module.exports } isQuanX() { return "undefined" != typeof $task } isSurge() { return "undefined" != typeof $httpClient && "undefined" == typeof $loon } isLoon() { return "undefined" != typeof $loon } toObj(t, e = null) { try { return JSON.parse(t) } catch { return e } } toStr(t, e = null) { try { return JSON.stringify(t) } catch { return e } } getjson(t, e) { let s = e; const i = this.getdata(t); if (i) try { s = JSON.parse(this.getdata(t)) } catch { } return s } setjson(t, e) { try { return this.setdata(JSON.stringify(t), e) } catch { return !1 } } getScript(t) { return new Promise(e => { this.get({ url: t }, (t, s, i) => e(i)) }) } runScript(t, e) { return new Promise(s => { let i = this.getdata("@chavy_boxjs_userCfgs.httpapi"); i = i ? i.replace(/\n/g, "").trim() : i; let r = this.getdata("@chavy_boxjs_userCfgs.httpapi_timeout"); r = r ? 1 * r : 20, r = e && e.timeout ? e.timeout : r; const [o, h] = i.split("@"), n = { url: `http://${h}/v1/scripting/evaluate`, body: { script_text: t, mock_type: "cron", timeout: r }, headers: { "X-Key": o, Accept: "*/*" } }; this.post(n, (t, e, i) => s(i)) }).catch(t => this.logErr(t)) } loaddata() { if (!this.isNode()) return {}; { this.fs = this.fs ? this.fs : require("fs"), this.path = this.path ? this.path : require("path"); const t = this.path.resolve(this.dataFile), e = this.path.resolve(process.cwd(), this.dataFile), s = this.fs.existsSync(t), i = !s && this.fs.existsSync(e); if (!s && !i) return {}; { const i = s ? t : e; try { return JSON.parse(this.fs.readFileSync(i)) } catch (t) { return {} } } } } writedata() { if (this.isNode()) { this.fs = this.fs ? this.fs : require("fs"), this.path = this.path ? this.path : require("path"); const t = this.path.resolve(this.dataFile), e = this.path.resolve(process.cwd(), this.dataFile), s = this.fs.existsSync(t), i = !s && this.fs.existsSync(e), r = JSON.stringify(this.data); s ? this.fs.writeFileSync(t, r) : i ? this.fs.writeFileSync(e, r) : this.fs.writeFileSync(t, r) } } lodash_get(t, e, s) { const i = e.replace(/\[(\d+)\]/g, ".$1").split("."); let r = t; for (const t of i) if (r = Object(r)[t], void 0 === r) return s; return r } lodash_set(t, e, s) { return Object(t) !== t ? t : (Array.isArray(e) || (e = e.toString().match(/[^.[\]]+/g) || []), e.slice(0, -1).reduce((t, s, i) => Object(t[s]) === t[s] ? t[s] : t[s] = Math.abs(e[i + 1]) >> 0 == +e[i + 1] ? [] : {}, t)[e[e.length - 1]] = s, t) } getdata(t) { let e = this.getval(t); if (/^@/.test(t)) { const [, s, i] = /^@(.*?)\.(.*?)$/.exec(t), r = s ? this.getval(s) : ""; if (r) try { const t = JSON.parse(r); e = t ? this.lodash_get(t, i, "") : e } catch (t) { e = "" } } return e } setdata(t, e) { let s = !1; if (/^@/.test(e)) { const [, i, r] = /^@(.*?)\.(.*?)$/.exec(e), o = this.getval(i), h = i ? "null" === o ? null : o || "{}" : "{}"; try { const e = JSON.parse(h); this.lodash_set(e, r, t), s = this.setval(JSON.stringify(e), i) } catch (e) { const o = {}; this.lodash_set(o, r, t), s = this.setval(JSON.stringify(o), i) } } else s = this.setval(t, e); return s } getval(t) { return this.isSurge() || this.isLoon() ? $persistentStore.read(t) : this.isQuanX() ? $prefs.valueForKey(t) : this.isNode() ? (this.data = this.loaddata(), this.data[t]) : this.data && this.data[t] || null } setval(t, e) { return this.isSurge() || this.isLoon() ? $persistentStore.write(t, e) : this.isQuanX() ? $prefs.setValueForKey(t, e) : this.isNode() ? (this.data = this.loaddata(), this.data[e] = t, this.writedata(), !0) : this.data && this.data[e] || null } initGotEnv(t) { this.got = this.got ? this.got : require("got"), this.cktough = this.cktough ? this.cktough : require("tough-cookie"), this.ckjar = this.ckjar ? this.ckjar : new this.cktough.CookieJar, t && (t.headers = t.headers ? t.headers : {}, void 0 === t.headers.Cookie && void 0 === t.cookieJar && (t.cookieJar = this.ckjar)) } get(t, e = (() => { })) { t.headers && (delete t.headers["Content-Type"], delete t.headers["Content-Length"]), this.isSurge() || this.isLoon() ? (this.isSurge() && this.isNeedRewrite && (t.headers = t.headers || {}, Object.assign(t.headers, { "X-Surge-Skip-Scripting": !1 })), $httpClient.get(t, (t, s, i) => { !t && s && (s.body = i, s.statusCode = s.status), e(t, s, i) })) : this.isQuanX() ? (this.isNeedRewrite && (t.opts = t.opts || {}, Object.assign(t.opts, { hints: !1 })), $task.fetch(t).then(t => { const { statusCode: s, statusCode: i, headers: r, body: o } = t; e(null, { status: s, statusCode: i, headers: r, body: o }, o) }, t => e(t))) : this.isNode() && (this.initGotEnv(t), this.got(t).on("redirect", (t, e) => { try { if (t.headers["set-cookie"]) { const s = t.headers["set-cookie"].map(this.cktough.Cookie.parse).toString(); s && this.ckjar.setCookieSync(s, null), e.cookieJar = this.ckjar } } catch (t) { this.logErr(t) } }).then(t => { const { statusCode: s, statusCode: i, headers: r, body: o } = t; e(null, { status: s, statusCode: i, headers: r, body: o }, o) }, t => { const { message: s, response: i } = t; e(s, i, i && i.body) })) } post(t, e = (() => { })) { if (t.body && t.headers && !t.headers["Content-Type"] && (t.headers["Content-Type"] = "application/x-www-form-urlencoded"), t.headers && delete t.headers["Content-Length"], this.isSurge() || this.isLoon()) this.isSurge() && this.isNeedRewrite && (t.headers = t.headers || {}, Object.assign(t.headers, { "X-Surge-Skip-Scripting": !1 })), $httpClient.post(t, (t, s, i) => { !t && s && (s.body = i, s.statusCode = s.status), e(t, s, i) }); else if (this.isQuanX()) t.method = "POST", this.isNeedRewrite && (t.opts = t.opts || {}, Object.assign(t.opts, { hints: !1 })), $task.fetch(t).then(t => { const { statusCode: s, statusCode: i, headers: r, body: o } = t; e(null, { status: s, statusCode: i, headers: r, body: o }, o) }, t => e(t)); else if (this.isNode()) { this.initGotEnv(t); const { url: s, ...i } = t; this.got.post(s, i).then(t => { const { statusCode: s, statusCode: i, headers: r, body: o } = t; e(null, { status: s, statusCode: i, headers: r, body: o }, o) }, t => { const { message: s, response: i } = t; e(s, i, i && i.body) }) } } time(t, e = null) { const s = e ? new Date(e) : new Date; let i = { "M+": s.getMonth() + 1, "d+": s.getDate(), "H+": s.getHours(), "m+": s.getMinutes(), "s+": s.getSeconds(), "q+": Math.floor((s.getMonth() + 3) / 3), S: s.getMilliseconds() }; /(y+)/.test(t) && (t = t.replace(RegExp.$1, (s.getFullYear() + "").substr(4 - RegExp.$1.length))); for (let e in i) new RegExp("(" + e + ")").test(t) && (t = t.replace(RegExp.$1, 1 == RegExp.$1.length ? i[e] : ("00" + i[e]).substr(("" + i[e]).length))); return t } msg(e = t, s = "", i = "", r) { const o = t => { if (!t) return t; if ("string" == typeof t) return this.isLoon() ? t : this.isQuanX() ? { "open-url": t } : this.isSurge() ? { url: t } : void 0; if ("object" == typeof t) { if (this.isLoon()) { let e = t.openUrl || t.url || t["open-url"], s = t.mediaUrl || t["media-url"]; return { openUrl: e, mediaUrl: s } } if (this.isQuanX()) { let e = t["open-url"] || t.url || t.openUrl, s = t["media-url"] || t.mediaUrl; return { "open-url": e, "media-url": s } } if (this.isSurge()) { let e = t.url || t.openUrl || t["open-url"]; return { url: e } } } }; if (this.isMute || (this.isSurge() || this.isLoon() ? $notification.post(e, s, i, o(r)) : this.isQuanX() && $notify(e, s, i, o(r))), !this.isMuteLog) { let t = ["", "==============📣系统通知📣=============="]; t.push(e), s && t.push(s), i && t.push(i), console.log(t.join("\n")), this.logs = this.logs.concat(t) } } log(...t) { t.length > 0 && (this.logs = [...this.logs, ...t]), console.log(t.join(this.logSeparator)) } logErr(t, e) { const s = !this.isSurge() && !this.isQuanX() && !this.isLoon(); s ? this.log("", `❗️${this.name}, 错误!`, t.stack) : this.log("", `❗️${this.name}, 错误!`, t) } wait(t) { return new Promise(e => setTimeout(e, t)) } done(t = {}) { const e = (new Date).getTime(), s = (e - this.startTime) / 1e3; this.log("", `🔔${this.name}, 结束! 🕛 ${s} 秒`), this.log(), (this.isSurge() || this.isQuanX() || this.isLoon()) && $done(t) } }(t, e) }
