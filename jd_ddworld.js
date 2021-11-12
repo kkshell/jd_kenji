@@ -64,6 +64,13 @@ let tokenInfo = {}, hotInfo = {}
       hotInfo[$.UserName] = $.hot
     }
   }
+  for (let i = 0; i < cookieArr.length; i++) {
+    if (cookiesArr[i]) {
+      cookie = cookiesArr[i];
+      $.UserName = decodeURIComponent(cookie.match(pt_pin));
+
+    }
+  }
   let res = []
   $.shareCodes = [...$.shareCodes, ...(res || [])]
   for (let i = 0; i < cookiesArr.length; i++) {
