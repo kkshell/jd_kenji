@@ -94,7 +94,6 @@ function getTaskFinishCount() {
                         data = JSON.parse(data);
                         if (data.code == 1) {
 
-
                             console.log(`总任务:${data.content.maxTaskCount}`)
                             console.log(`当前已做${data.content.finishCount}个`)
                             if (data.content.finishCount == 8) {
