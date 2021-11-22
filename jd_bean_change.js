@@ -48,6 +48,7 @@ let notifySkipList = "";
 let IndexAll = 0;
 let EnableMonth = "false";
 let isSignError = false;
+let ReturnMessageTitle="";
 //IOS等用户直接用NobyDa的jd cookie
 let cookiesArr = [], cookie = '';
 const JD_API_HOST = 'https://api.m.jd.com/client.action';
@@ -56,6 +57,8 @@ let i = 0;
 let DisableCash = "false";
 let llShowMonth = false;
 let Today = new Date();
+let strAllNotify="";
+let llPetError=false;
 let RemainMessage = '\n';
 RemainMessage += "⭕提醒:⭕" + '\n';
 RemainMessage += '【极速金币】京东极速版->我的->金币(极速版使用)\n';
@@ -98,8 +101,21 @@ if ($.isNode() && process.env.BEANCHANGE_USERGP4) {
 if ($.isNode() && process.env.BEANCHANGE_DISABLECASH) {
 	DisableCash = process.env.BEANCHANGE_DISABLECASH;
 }
-if ($.isNode() && process.env.BEANCHANGE_ENABLEMONTH) {
-	EnableMonth = process.env.BEANCHANGE_ENABLEMONTH;
+//取消月结查询
+//if ($.isNode() && process.env.BEANCHANGE_ENABLEMONTH) {
+//EnableMonth = process.env.BEANCHANGE_ENABLEMONTH;
+//}
+if ($.isNode() && process.env.BEANCHANGE_ALLNOTIFY) {
+
+	var strTempNotify=process.env.BEANCHANGE_ALLNOTIFY ? process.env.BEANCHANGE_ALLNOTIFY.split('&') : [];
+	if (strTempNotify.length > 0) {
+		for (var TempNotifyl in strTempNotify) {
+			strAllNotify+=strTempNotify[TempNotifyl]+'\n';
+		}
+	}
+	console.log(`检测到设定了公告,将在推送信息中置顶显示...`);
+	strAllNotify = `【✨✨✨✨公告✨✨✨✨】\n`+strAllNotify;
+	console.log(strAllNotify);
 }
 
 if (EnableMonth == "true" && Today.getDate() == 1 && Today.getHours() > 17)
@@ -217,6 +233,9 @@ if ($.isNode()) {
 				if ((i + 1) % intPerSent == 0) {
 					console.log("分段通知条件达成，处理发送通知....");
 					if ($.isNode() && allMessage) {
+						if(strAllNotify)
+							allMessage=strAllNotify+`\n`+allMessage;
+
 						await notify.sendNotify(`${$.name}`, `${allMessage}`, {
 							url: `https://bean.m.jd.com/beanDetail/index.action?resourceValue=bean`
 						})
@@ -282,6 +301,9 @@ if ($.isNode()) {
 		if (allMessage || allMessageMonth) {
 			console.log("分段通知收尾，处理发送通知....");
 			if ($.isNode() && allMessage) {
+				if(strAllNotify)
+					allMessage=strAllNotify+`\n`+allMessage;
+
 				await notify.sendNotify(`${$.name}`, `${allMessage}`, {
 					url: `https://bean.m.jd.com/beanDetail/index.action?resourceValue=bean`
 				})
@@ -295,24 +317,33 @@ if ($.isNode()) {
 	} else {
 
 		if ($.isNode() && allMessageGp2) {
+			if(strAllNotify)
+				allMessageGp2=strAllNotify+`\n`+allMessageGp2;
 			await notify.sendNotify(`${$.name}#2`, `${allMessageGp2}`, {
 				url: `https://bean.m.jd.com/beanDetail/index.action?resourceValue=bean`
 			})
 			await $.wait(10 * 1000);
 		}
 		if ($.isNode() && allMessageGp3) {
+			if(strAllNotify)
+				allMessageGp3=strAllNotify+`\n`+allMessageGp3;
 			await notify.sendNotify(`${$.name}#3`, `${allMessageGp3}`, {
 				url: `https://bean.m.jd.com/beanDetail/index.action?resourceValue=bean`
 			})
 			await $.wait(10 * 1000);
 		}
 		if ($.isNode() && allMessageGp4) {
+			if(strAllNotify)
+				allMessageGp4=strAllNotify+`\n`+allMessageGp4;
 			await notify.sendNotify(`${$.name}#4`, `${allMessageGp4}`, {
 				url: `https://bean.m.jd.com/beanDetail/index.action?resourceValue=bean`
 			})
 			await $.wait(10 * 1000);
 		}
 		if ($.isNode() && allMessage) {
+			if(strAllNotify)
+				allMessage=strAllNotify+`\n`+allMessage;
+
 			await notify.sendNotify(`${$.name}`, `${allMessage}`, {
 				url: `https://bean.m.jd.com/beanDetail/index.action?resourceValue=bean`
 			})
@@ -375,17 +406,18 @@ if ($.isNode()) {
 	}
 
 })()
-.catch((e) => {
-	$.log('', `❌ ${$.name}, 失败! 原因: ${e}!`, '')
-})
-.finally(() => {
-	$.done();
-})
+	.catch((e) => {
+		$.log('', `❌ ${$.name}, 失败! 原因: ${e}!`, '')
+	})
+	.finally(() => {
+		$.done();
+	})
 async function showMsg() {
 	//if ($.errorMsg)
 	//return
+	ReturnMessageTitle="";
+	ReturnMessage = "";
 
-	//ReturnMessage = `👇=======账号${$.index}=======👇\n`
 	if (MessageUserGp2) {
 		userIndex2 = MessageUserGp2.findIndex((item) => item === $.pt_pin);
 	}
@@ -398,54 +430,55 @@ async function showMsg() {
 
 	if (userIndex2 != -1) {
 		IndexGp2 += 1;
-		ReturnMessage = `【账号${IndexGp2}🆔】${$.nickName || $.UserName}\n`;
+		ReturnMessageTitle = `【账号${IndexGp2}🆔】${$.nickName || $.UserName}\n`;
 	}
 	if (userIndex3 != -1) {
 		IndexGp3 += 1;
-		ReturnMessage = `【账号${IndexGp3}🆔】${$.nickName || $.UserName}\n`;
+		ReturnMessageTitle = `【账号${IndexGp3}🆔】${$.nickName || $.UserName}\n`;
 	}
 	if (userIndex4 != -1) {
 		IndexGp4 += 1;
-		ReturnMessage = `【账号${IndexGp4}🆔】${$.nickName || $.UserName}\n`;
+		ReturnMessageTitle = `【账号${IndexGp4}🆔】${$.nickName || $.UserName}\n`;
 	}
 	if (userIndex2 == -1 && userIndex3 == -1 && userIndex4 == -1) {
 		IndexAll += 1;
-		ReturnMessage = `【账号${IndexAll}🆔】${$.nickName || $.UserName}\n`;
+		ReturnMessageTitle = `【账号${IndexAll}🆔】${$.nickName || $.UserName}\n`;
 	}
 
-	if ($.levelName || $.JingXiang)
+	if ($.levelName || $.JingXiang){
 		ReturnMessage += `【账号信息】`;
-
-	if ($.levelName) {
-		if ($.levelName.length > 2)
-			$.levelName = $.levelName.substring(0, 2);
-
-		if ($.levelName == "注册")
-			$.levelName = `😊普通`;
-
-		if ($.levelName == "钻石")
-			$.levelName = `💎钻石`;
-
-		if ($.levelName == "金牌")
-			$.levelName = `🥇金牌`;
-
-		if ($.levelName == "银牌")
-			$.levelName = `🥈银牌`;
-
-		if ($.levelName == "铜牌")
-			$.levelName = `🥉铜牌`;
-
-		if ($.isPlusVip == 1)
-			ReturnMessage += `${$.levelName}Plus`;
-		else
-			ReturnMessage += `${$.levelName}会员`;
-	}
-
-	if ($.JingXiang){
 		if ($.levelName) {
-			ReturnMessage +=",";
+			if ($.levelName.length > 2)
+				$.levelName = $.levelName.substring(0, 2);
+
+			if ($.levelName == "注册")
+				$.levelName = `😊普通`;
+
+			if ($.levelName == "钻石")
+				$.levelName = `💎钻石`;
+
+			if ($.levelName == "金牌")
+				$.levelName = `🥇金牌`;
+
+			if ($.levelName == "银牌")
+				$.levelName = `🥈银牌`;
+
+			if ($.levelName == "铜牌")
+				$.levelName = `🥉铜牌`;
+
+			if ($.isPlusVip == 1)
+				ReturnMessage += `${$.levelName}Plus`;
+			else
+				ReturnMessage += `${$.levelName}会员`;
 		}
-		ReturnMessage += `${$.JingXiang}`;
+
+		if ($.JingXiang){
+			if ($.levelName) {
+				ReturnMessage +=",";
+			}
+			ReturnMessage += `${$.JingXiang}`;
+		}
+		ReturnMessage +=`\n`;
 	}
 	if (llShowMonth) {
 		ReturnMessageMonth = ReturnMessage;
@@ -472,7 +505,7 @@ async function showMsg() {
 
 	}
 
-	ReturnMessage += `\n【今日京豆】收${$.todayIncomeBean}豆`;
+	ReturnMessage += `【今日京豆】收${$.todayIncomeBean}豆`;
 
 	if ($.todayOutcomeBean != 0) {
 		ReturnMessage += `,支${$.todayOutcomeBean}豆`;
@@ -485,7 +518,11 @@ async function showMsg() {
 		ReturnMessage += `,支${$.expenseBean}豆`;
 	}
 	ReturnMessage += `\n`;
-	ReturnMessage += `【当前京豆】${$.beanCount}豆(≈${($.beanCount / 100).toFixed(2)}元)\n`;
+	if ($.levelName || $.JingXiang){
+		ReturnMessage += `【当前京豆】${$.beanCount}豆(≈${($.beanCount / 100).toFixed(2)}元)\n`;
+	} else {
+		ReturnMessage += `【当前京豆】获取失败,接口返回空数据\n`;
+	}
 
 	if (typeof $.JDEggcnt !== "undefined") {
 		if ($.JDEggcnt == 0) {
@@ -621,87 +658,93 @@ async function showMsg() {
 		TempBaipiao += `【京喜工厂】${$.jxFactoryReceive} 可以兑换了!\n`;
 
 	}
+
+	llPetError=false;
 	const response = await PetRequest('energyCollect');
 	const initPetTownRes = await PetRequest('initPetTown');
-	if (initPetTownRes.code === '0' && initPetTownRes.resultCode === '0' && initPetTownRes.message === 'success') {
-		$.petInfo = initPetTownRes.result;
-		if ($.petInfo.userStatus === 0) {
-			ReturnMessage += `【东东萌宠】活动未开启!\n`;
-		} else if ($.petInfo.petStatus === 5) {
-			ReturnMessage += `【东东萌宠】${$.petInfo.goodsInfo.goodsName}已可领取!\n`;
-			TempBaipiao += `【东东萌宠】${$.petInfo.goodsInfo.goodsName}已可领取!\n`;
-			if (userIndex2 != -1) {
-				ReceiveMessageGp2 += `【账号${IndexGp2} ${$.nickName || $.UserName}】${$.petInfo.goodsInfo.goodsName}可以兑换了! (东东萌宠)\n`;
-			}
-			if (userIndex3 != -1) {
-				ReceiveMessageGp3 += `【账号${IndexGp3} ${$.nickName || $.UserName}】${$.petInfo.goodsInfo.goodsName}可以兑换了! (东东萌宠)\n`;
-			}
-			if (userIndex4 != -1) {
-				ReceiveMessageGp4 += `【账号${IndexGp4} ${$.nickName || $.UserName}】${$.petInfo.goodsInfo.goodsName}可以兑换了! (东东萌宠)\n`;
-			}
-			if (userIndex2 == -1 && userIndex3 == -1 && userIndex4 == -1) {
-				allReceiveMessage += `【账号${IndexAll} ${$.nickName || $.UserName}】${$.petInfo.goodsInfo.goodsName}可以兑换了! (东东萌宠)\n`;
-			}
-		} else if ($.petInfo.petStatus === 6) {
-			TempBaipiao += `【东东萌宠】未选择物品! \n`;
-			if (userIndex2 != -1) {
-				WarnMessageGp2 += `【账号${IndexGp2} ${$.nickName || $.UserName}】未选择物品! (东东萌宠)\n`;
-			}
-			if (userIndex3 != -1) {
-				WarnMessageGp3 += `【账号${IndexGp3} ${$.nickName || $.UserName}】未选择物品! (东东萌宠)\n`;
-			}
-			if (userIndex4 != -1) {
-				WarnMessageGp4 += `【账号${IndexGp4} ${$.nickName || $.UserName}】未选择物品! (东东萌宠)\n`;
-			}
-			if (userIndex2 == -1 && userIndex3 == -1 && userIndex4 == -1) {
-				allWarnMessage += `【账号${IndexAll} ${$.nickName || $.UserName}】未选择物品! (东东萌宠)\n`;
-			}
-		} else if (response.resultCode === '0') {
-			ReturnMessage += `【东东萌宠】${$.petInfo.goodsInfo.goodsName}`;
-			ReturnMessage += `(${(response.result.medalPercent).toFixed(0)}%,${response.result.medalNum}/${response.result.medalNum+response.result.needCollectMedalNum}块)\n`;
-		} else if (!$.petInfo.goodsInfo) {
-			ReturnMessage += `【东东萌宠】暂未选购新的商品!\n`;
-			TempBaipiao += `【东东萌宠】暂未选购新的商品! \n`;
-			if (userIndex2 != -1) {
-				WarnMessageGp2 += `【账号${IndexGp2} ${$.nickName || $.UserName}】暂未选购新的商品! (东东萌宠)\n`;
-			}
-			if (userIndex3 != -1) {
-				WarnMessageGp3 += `【账号${IndexGp3} ${$.nickName || $.UserName}】暂未选购新的商品! (东东萌宠)\n`;
-			}
-			if (userIndex4 != -1) {
-				WarnMessageGp4 += `【账号${IndexGp4} ${$.nickName || $.UserName}】暂未选购新的商品! (东东萌宠)\n`;
-			}
-			if (userIndex2 == -1 && userIndex3 == -1 && userIndex4 == -1) {
-				allWarnMessage += `【账号${IndexAll} ${$.nickName || $.UserName}】暂未选购新的商品! (东东萌宠)\n`;
-			}
+	if(!llPetError && initPetTownRes){
+		if (initPetTownRes.code === '0' && initPetTownRes.resultCode === '0' && initPetTownRes.message === 'success') {
+			$.petInfo = initPetTownRes.result;
+			if ($.petInfo.userStatus === 0) {
+				ReturnMessage += `【东东萌宠】活动未开启!\n`;
+			} else if ($.petInfo.petStatus === 5) {
+				ReturnMessage += `【东东萌宠】${$.petInfo.goodsInfo.goodsName}已可领取!\n`;
+				TempBaipiao += `【东东萌宠】${$.petInfo.goodsInfo.goodsName}已可领取!\n`;
+				if (userIndex2 != -1) {
+					ReceiveMessageGp2 += `【账号${IndexGp2} ${$.nickName || $.UserName}】${$.petInfo.goodsInfo.goodsName}可以兑换了! (东东萌宠)\n`;
+				}
+				if (userIndex3 != -1) {
+					ReceiveMessageGp3 += `【账号${IndexGp3} ${$.nickName || $.UserName}】${$.petInfo.goodsInfo.goodsName}可以兑换了! (东东萌宠)\n`;
+				}
+				if (userIndex4 != -1) {
+					ReceiveMessageGp4 += `【账号${IndexGp4} ${$.nickName || $.UserName}】${$.petInfo.goodsInfo.goodsName}可以兑换了! (东东萌宠)\n`;
+				}
+				if (userIndex2 == -1 && userIndex3 == -1 && userIndex4 == -1) {
+					allReceiveMessage += `【账号${IndexAll} ${$.nickName || $.UserName}】${$.petInfo.goodsInfo.goodsName}可以兑换了! (东东萌宠)\n`;
+				}
+			} else if ($.petInfo.petStatus === 6) {
+				TempBaipiao += `【东东萌宠】未选择物品! \n`;
+				if (userIndex2 != -1) {
+					WarnMessageGp2 += `【账号${IndexGp2} ${$.nickName || $.UserName}】未选择物品! (东东萌宠)\n`;
+				}
+				if (userIndex3 != -1) {
+					WarnMessageGp3 += `【账号${IndexGp3} ${$.nickName || $.UserName}】未选择物品! (东东萌宠)\n`;
+				}
+				if (userIndex4 != -1) {
+					WarnMessageGp4 += `【账号${IndexGp4} ${$.nickName || $.UserName}】未选择物品! (东东萌宠)\n`;
+				}
+				if (userIndex2 == -1 && userIndex3 == -1 && userIndex4 == -1) {
+					allWarnMessage += `【账号${IndexAll} ${$.nickName || $.UserName}】未选择物品! (东东萌宠)\n`;
+				}
+			} else if (response.resultCode === '0') {
+				ReturnMessage += `【东东萌宠】${$.petInfo.goodsInfo.goodsName}`;
+				ReturnMessage += `(${(response.result.medalPercent).toFixed(0)}%,${response.result.medalNum}/${response.result.medalNum+response.result.needCollectMedalNum}块)\n`;
+			} else if (!$.petInfo.goodsInfo) {
+				ReturnMessage += `【东东萌宠】暂未选购新的商品!\n`;
+				TempBaipiao += `【东东萌宠】暂未选购新的商品! \n`;
+				if (userIndex2 != -1) {
+					WarnMessageGp2 += `【账号${IndexGp2} ${$.nickName || $.UserName}】暂未选购新的商品! (东东萌宠)\n`;
+				}
+				if (userIndex3 != -1) {
+					WarnMessageGp3 += `【账号${IndexGp3} ${$.nickName || $.UserName}】暂未选购新的商品! (东东萌宠)\n`;
+				}
+				if (userIndex4 != -1) {
+					WarnMessageGp4 += `【账号${IndexGp4} ${$.nickName || $.UserName}】暂未选购新的商品! (东东萌宠)\n`;
+				}
+				if (userIndex2 == -1 && userIndex3 == -1 && userIndex4 == -1) {
+					allWarnMessage += `【账号${IndexAll} ${$.nickName || $.UserName}】暂未选购新的商品! (东东萌宠)\n`;
+				}
 
+			}
 		}
 	}
-
 	ReturnMessage += `🧧🧧🧧红包明细🧧🧧🧧\n`;
 	ReturnMessage += `${$.message}`;
 
 	if (userIndex2 != -1) {
-		allMessageGp2 += ReturnMessage + `\n`;
+		allMessageGp2 += ReturnMessageTitle+ReturnMessage + `\n`;
 	}
 	if (userIndex3 != -1) {
-		allMessageGp3 += ReturnMessage + `\n`;
+		allMessageGp3 += ReturnMessageTitle+ReturnMessage + `\n`;
 	}
 	if (userIndex4 != -1) {
-		allMessageGp4 += ReturnMessage + `\n`;
+		allMessageGp4 += ReturnMessageTitle+ReturnMessage + `\n`;
 	}
 	if (userIndex2 == -1 && userIndex3 == -1 && userIndex4 == -1) {
-		allMessage += ReturnMessage + `\n`;
+		allMessage += ReturnMessageTitle+ReturnMessage + `\n`;
 	}
 
-	console.log(`${ReturnMessage}`);
+	console.log(`${ReturnMessageTitle+ReturnMessage}`);
 
 	if ($.isNode() && WP_APP_TOKEN_ONE) {
 		if (TempBaipiao) {
 			TempBaipiao = `【⏰商品白嫖活动提醒⏰】\n` + TempBaipiao;
 			ReturnMessage = TempBaipiao + `\n` + ReturnMessage;
 		}
+		ReturnMessage=`【账号名称】${$.nickName || $.UserName}\n`+ReturnMessage;
 		ReturnMessage += RemainMessage;
+		if(strAllNotify)
+			ReturnMessage=strAllNotify+`\n`+ReturnMessage;
 
 		await notify.sendNotifybyWxPucher(`${$.name}`, `${ReturnMessage}`, `${$.UserName}`);
 	}
@@ -718,9 +761,9 @@ async function bean() {
 	// 今天0:0:0时间戳
 	const tm1 = parseInt((Date.now() + 28800000) / 86400000) * 86400000 - 28800000;
 	let page = 1,
-	t = 0,
-	yesterdayArr = [],
-	todayArr = [];
+		t = 0,
+		yesterdayArr = [],
+		todayArr = [];
 	do {
 		let response = await getJingBeanBalanceDetail(page);
 		await $.wait(2000);
@@ -803,8 +846,8 @@ async function Monthbean() {
 	console.log(`计算月京豆结束日期:` + GetDateTime(new Date(year + "-" + (month + 1) + "-01 00:00:00")));
 
 	let allpage = 1,
-	allt = 0,
-	allyesterdayArr = [];
+		allt = 0,
+		allyesterdayArr = [];
 	do {
 		let response = await getJingBeanBalanceDetail(allpage);
 		await $.wait(1000);
@@ -851,54 +894,54 @@ async function Monthbean() {
 
 async function jdCash() {
 	let functionId = "cash_homePage"
-		let body = "%7B%7D"
-		let uuid = randomString(16)
-		console.log(`正在获取领现金任务签名...`);
+	let body = "%7B%7D"
+	let uuid = randomString(16)
+	console.log(`正在获取领现金任务签名...`);
 	isSignError = false;
 	let sign = await getSign(functionId, decodeURIComponent(body), uuid)
-		if (isSignError) {
-			console.log(`领现金任务签名获取失败,等待10秒后再次尝试...`)
-			await $.wait(10 * 1000);
-			isSignError = false;
-			sign = await getSign(functionId, decodeURIComponent(body), uuid);
-		}
-		if (isSignError) {
-			console.log(`领现金任务签名获取失败,等待10秒后再次尝试...`)
-			await $.wait(10 * 1000);
-			isSignError = false;
-			sign = await getSign(functionId, decodeURIComponent(body), uuid);
-		}
-		if (!isSignError) {
-			console.log(`领现金任务签名获取成功...`)
-		} else {
-			console.log(`领现金任务签名获取失败...`)
-			$.jdCash = 0;
-			return
-		}
-		let url = `${JD_API_HOST}?functionId=${functionId}&build=167774&client=apple&clientVersion=10.1.0&uuid=${uuid}&${sign}`
-		return new Promise((resolve) => {
-			$.post(apptaskUrl(url, body), async(err, resp, data) => {
-				try {
-					if (err) {
-						console.log(`${JSON.stringify(err)}`)
-						console.log(`${$.name} API请求失败，请检查网路重试`)
-					} else {
-						if (safeGet(data)) {
-							data = JSON.parse(data);
-							if (data.code === 0 && data.data.result) {
-								$.jdCash = data.data.result.totalMoney || 0;
-								return
-							}
+	if (isSignError) {
+		console.log(`领现金任务签名获取失败,等待2秒后再次尝试...`)
+		await $.wait(2 * 1000);
+		isSignError = false;
+		sign = await getSign(functionId, decodeURIComponent(body), uuid);
+	}
+	if (isSignError) {
+		console.log(`领现金任务签名获取失败,等待2秒后再次尝试...`)
+		await $.wait(2 * 1000);
+		isSignError = false;
+		sign = await getSign(functionId, decodeURIComponent(body), uuid);
+	}
+	if (!isSignError) {
+		console.log(`领现金任务签名获取成功...`)
+	} else {
+		console.log(`领现金任务签名获取失败...`)
+		$.jdCash = 0;
+		return
+	}
+	let url = `${JD_API_HOST}?functionId=${functionId}&build=167774&client=apple&clientVersion=10.1.0&uuid=${uuid}&${sign}`
+	return new Promise((resolve) => {
+		$.post(apptaskUrl(url, body), async(err, resp, data) => {
+			try {
+				if (err) {
+					console.log(`${JSON.stringify(err)}`)
+					console.log(`jdCash API请求失败，请检查网路重试`)
+				} else {
+					if (safeGet(data)) {
+						data = JSON.parse(data);
+						if (data.code === 0 && data.data.result) {
+							$.jdCash = data.data.result.totalMoney || 0;
+							return
 						}
 					}
-				} catch (e) {
-					$.logErr(e, resp)
 				}
-				finally {
-					resolve(data);
-				}
-			})
+			} catch (e) {
+				$.logErr(e, resp)
+			}
+			finally {
+				resolve(data);
+			}
 		})
+	})
 }
 function apptaskUrl(url, body) {
 	return {
@@ -927,7 +970,7 @@ function getSign(functionid, body, uuid) {
 		}
 		let HostArr = ['jdsign.cf', 'signer.nz.lu']
 		let Host = HostArr[Math.floor((Math.random() * HostArr.length))]
-			let options = {
+		let options = {
 			url: `https://cdn.nz.lu/ddo`,
 			body: JSON.stringify(data),
 			headers: {
@@ -1016,12 +1059,12 @@ function TotalBean2() {
 				if (err) {
 					$.logErr(err);
 				} else {
-					if (data) {						
-						data = JSON.parse(data);						
+					if (data) {
+						data = JSON.parse(data);
 						if (!data.user) {
 							return;
 						}
-						const userInfo = data.user;						
+						const userInfo = data.user;
 						if (userInfo) {
 							if (!$.nickName)
 								$.nickName = userInfo.petName;
@@ -1095,7 +1138,7 @@ function getJingBeanBalanceDetail(page) {
 			try {
 				if (err) {
 					console.log(`${JSON.stringify(err)}`)
-					console.log(`${$.name} API请求失败，请检查网路重试`)
+					console.log(`getJingBeanBalanceDetail API请求失败，请检查网路重试`)
 				} else {
 					if (data) {
 						data = JSON.parse(data);
@@ -1133,7 +1176,7 @@ function queryexpirejingdou() {
 			try {
 				if (err) {
 					console.log(`${JSON.stringify(err)}`)
-					console.log(`${$.name} API请求失败，请检查网路重试`)
+					console.log(`queryexpirejingdou API请求失败，请检查网路重试`)
 				} else {
 					if (data) {
 						// console.log(data)
@@ -1181,18 +1224,18 @@ function redPacket() {
 			try {
 				if (err) {
 					console.log(`${JSON.stringify(err)}`)
-					console.log(`${$.name} API请求失败，请检查网路重试`)
+					console.log(`redPacket API请求失败，请检查网路重试`)
 				} else {
 					if (data) {
 						data = JSON.parse(data).data;
 						$.jxRed = 0,
-						$.jsRed = 0,
-						$.jdRed = 0,
-						$.jdhRed = 0,
-						$.jxRedExpire = 0,
-						$.jsRedExpire = 0,
-						$.jdRedExpire = 0,
-						$.jdhRedExpire = 0;
+							$.jsRed = 0,
+							$.jdRed = 0,
+							$.jdhRed = 0,
+							$.jxRedExpire = 0,
+							$.jsRedExpire = 0,
+							$.jdRedExpire = 0,
+							$.jdhRedExpire = 0;
 						let t = new Date();
 						t.setDate(t.getDate() + 1);
 						t.setHours(0, 0, 0, 0);
@@ -1258,7 +1301,7 @@ function getJdZZ() {
 					console.log(`京东赚赚API请求失败，请检查网路重试`);
 				} else {
 					if (safeGet(data)) {
-						data = JSON.parse(data);						
+						data = JSON.parse(data);
 						$.JdzzNum = data.data.totalNum;
 					}
 				}
@@ -1295,13 +1338,13 @@ function getMs() {
 			try {
 				if (err) {
 					console.log(`${err},${jsonParse(resp.body)['message']}`)
-					console.log(`${$.name} API请求失败，请检查网路重试`)
+					console.log(`getMs API请求失败，请检查网路重试`)
 				} else {
 					if (safeGet(data)) {
 						data = JSON.parse(data)
-							if (data.code === 2041 || data.code === 2042) {
-								$.JdMsScore = data.result.assignment.assignmentPoints || 0
-							}
+						if (data.code === 2041 || data.code === 2042) {
+							$.JdMsScore = data.result.assignment.assignmentPoints || 0
+						}
 					}
 				}
 			} catch (e) {
@@ -1363,18 +1406,18 @@ async function getjdfruit() {
 				} else {
 					if (safeGet(data)) {
 						$.farmInfo = JSON.parse(data)
-							if ($.farmInfo.farmUserPro) {
-								$.JdFarmProdName = $.farmInfo.farmUserPro.name;
-								$.JdtreeEnergy = $.farmInfo.farmUserPro.treeEnergy;
-								$.JdtreeTotalEnergy = $.farmInfo.farmUserPro.treeTotalEnergy;
-								$.treeState = $.farmInfo.treeState;
-								let waterEveryDayT = $.JDwaterEveryDayT;
-								let waterTotalT = ($.farmInfo.farmUserPro.treeTotalEnergy - $.farmInfo.farmUserPro.treeEnergy - $.farmInfo.farmUserPro.totalEnergy) / 10; //一共还需浇多少次水
-								let waterD = Math.ceil(waterTotalT / waterEveryDayT);
+						if ($.farmInfo.farmUserPro) {
+							$.JdFarmProdName = $.farmInfo.farmUserPro.name;
+							$.JdtreeEnergy = $.farmInfo.farmUserPro.treeEnergy;
+							$.JdtreeTotalEnergy = $.farmInfo.farmUserPro.treeTotalEnergy;
+							$.treeState = $.farmInfo.treeState;
+							let waterEveryDayT = $.JDwaterEveryDayT;
+							let waterTotalT = ($.farmInfo.farmUserPro.treeTotalEnergy - $.farmInfo.farmUserPro.treeEnergy - $.farmInfo.farmUserPro.totalEnergy) / 10; //一共还需浇多少次水
+							let waterD = Math.ceil(waterTotalT / waterEveryDayT);
 
-								$.JdwaterTotalT = waterTotalT;
-								$.JdwaterD = waterD;
-							}
+							$.JdwaterTotalT = waterTotalT;
+							$.JdwaterD = waterD;
+						}
 					}
 				}
 			} catch (e) {
@@ -1420,6 +1463,7 @@ async function PetRequest(function_id, body = {}) {
 		$.post(taskPetUrl(function_id, body), (err, resp, data) => {
 			try {
 				if (err) {
+					llPetError=true;
 					console.log('\n东东萌宠: API查询请求失败 ‼️‼️');
 					console.log(JSON.stringify(err));
 					$.logErr(err);
@@ -1484,23 +1528,26 @@ function cash() {
 				}
 			}),
 			async(err, resp, data) => {
-			try {
-				if (err) {
-					console.log(`${JSON.stringify(err)}`)
-					console.log(`${$.name} API请求失败，请检查网路重试`)
-				} else {
-					if (safeGet(data)) {
-						data = JSON.parse(data);
-						$.JDtotalcash = data.data.goldBalance;
+				try {
+					if (err) {
+						console.log(`${JSON.stringify(err)}`)
+						console.log(`cash API请求失败，请检查网路重试`)
+					} else {
+						if (safeGet(data)) {
+							data = JSON.parse(data);
+							if (data.data.goldBalance)
+								$.JDtotalcash = data.data.goldBalance;
+							else
+								console.log(`领现金查询失败，服务器没有返回具体值.`)
+						}
 					}
+				} catch (e) {
+					$.logErr(e, resp)
 				}
-			} catch (e) {
-				$.logErr(e, resp)
-			}
-			finally {
-				resolve(data);
-			}
-		})
+				finally {
+					resolve(data);
+				}
+			})
 	})
 }
 
@@ -1560,7 +1607,7 @@ async function JxmcGetRequest() {
 			try {
 				if (err) {
 					console.log(`${JSON.stringify(err)}`)
-					console.log(`API请求失败，请检查网路重试`)
+					console.log(`JxmcGetRequest API请求失败，请检查网路重试`)
 					$.runFlag = false;
 					console.log(`请求失败`)
 				} else {
@@ -1629,7 +1676,7 @@ function getJxFactory() {
 								$.unActive = false; //标记是否开启了京喜活动或者选购了商品进行生产
 								if (!data.factoryList) {
 									infoMsg = ""
-										// $.msg($.name, '【提示】', `京东账号${$.index}[${$.nickName}]京喜工厂活动未开始\n请手动去京东APP->游戏与互动->查看更多->京喜工厂 开启活动`);
+									// $.msg($.name, '【提示】', `京东账号${$.index}[${$.nickName}]京喜工厂活动未开始\n请手动去京东APP->游戏与互动->查看更多->京喜工厂 开启活动`);
 								} else if (data.factoryList && !data.productionList) {
 									infoMsg = ""
 								}
@@ -1654,11 +1701,11 @@ function getJxFactory() {
 // 惊喜的Taskurl
 function jxTaskurl(functionId, body = '', stk) {
 	let url = `https://m.jingxi.com/dreamfactory/${functionId}?zone=dream_factory&${body}&sceneval=2&g_login_type=1&_time=${Date.now()}&_=${Date.now() + 2}&_ste=1`
-		url += `&h5st=${decrypt(Date.now(), stk, '', url)}`
-		if (stk) {
-			url += `&_stk=${encodeURIComponent(stk)}`;
-		}
-		return {
+	url += `&h5st=${decrypt(Date.now(), stk, '', url)}`
+	if (stk) {
+		url += `&_stk=${encodeURIComponent(stk)}`;
+	}
+	return {
 		url,
 		headers: {
 			'Cookie': cookie,
@@ -1681,7 +1728,7 @@ function GetCommodityDetails() {
 			try {
 				if (err) {
 					console.log(`${JSON.stringify(err)}`)
-					console.log(`${$.name} API请求失败，请检查网路重试`)
+					console.log(`GetCommodityDetails API请求失败，请检查网路重试`)
 				} else {
 					if (safeGet(data)) {
 						data = JSON.parse(data);
@@ -1712,8 +1759,8 @@ async function getDdFactoryInfo() {
 			try {
 				if (err) {
 					$.ddFactoryInfo = "获取失败!"
-						/*console.log(`${JSON.stringify(err)}`)
-						console.log(`${$.name} API请求失败，请检查网路重试`)*/
+					/*console.log(`${JSON.stringify(err)}`)
+                    console.log(`${$.name} API请求失败，请检查网路重试`)*/
 				} else {
 					if (safeGet(data)) {
 						data = JSON.parse(data);
@@ -1737,7 +1784,7 @@ async function getDdFactoryInfo() {
 								if (((remainScore * 1 + useScore * 1) >= totalScore * 1 + 100000) && (couponCount * 1 > 0)) {
 									// await jdfactory_addEnergy();
 									infoMsg = `${name} 可以兑换了!`
-										$.DdFactoryReceive = `${name}`;
+									$.DdFactoryReceive = `${name}`;
 
 								}
 
@@ -1823,8 +1870,8 @@ function taskPostClientActionUrl(body) {
 function randomString(e) {
 	e = e || 32;
 	let t = "0123456789abcdef",
-	a = t.length,
-	n = "";
+		a = t.length,
+		n = "";
 	for (let i = 0; i < e; i++)
 		n += t.charAt(Math.floor(Math.random() * a));
 	return n
@@ -1833,7 +1880,7 @@ function randomString(e) {
 function getGetRequest(type, url) {
 	UA = `jdpingou;iPhone;4.13.0;14.4.2;${randomString(40)};network/wifi;model/iPhone10,2;appBuild/100609;ADID/00000000-0000-0000-0000-000000000000;supportApplePay/1;hasUPPay/0;pushNoticeIsOpen/1;hasOCPay/0;supportBestPay/0;session/${Math.random * 98 + 1};pap/JA2019_3111789;brand/apple;supportJDSHWK/1;Mozilla/5.0 (iPhone; CPU iPhone OS 14_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148`
 
-		const method = `GET`;
+	const method = `GET`;
 	let headers = {
 		'Origin': `https://st.jingxi.com`,
 		'Cookie': cookie,
@@ -1854,25 +1901,25 @@ function getGetRequest(type, url) {
 
 Date.prototype.Format = function (fmt) {
 	var e,
-	n = this,
-	d = fmt,
-	l = {
-		"M+": n.getMonth() + 1,
-		"d+": n.getDate(),
-		"D+": n.getDate(),
-		"h+": n.getHours(),
-		"H+": n.getHours(),
-		"m+": n.getMinutes(),
-		"s+": n.getSeconds(),
-		"w+": n.getDay(),
-		"q+": Math.floor((n.getMonth() + 3) / 3),
-		"S+": n.getMilliseconds()
-	};
+		n = this,
+		d = fmt,
+		l = {
+			"M+": n.getMonth() + 1,
+			"d+": n.getDate(),
+			"D+": n.getDate(),
+			"h+": n.getHours(),
+			"H+": n.getHours(),
+			"m+": n.getMinutes(),
+			"s+": n.getSeconds(),
+			"w+": n.getDay(),
+			"q+": Math.floor((n.getMonth() + 3) / 3),
+			"S+": n.getMilliseconds()
+		};
 	/(y+)/i.test(d) && (d = d.replace(RegExp.$1, "".concat(n.getFullYear()).substr(4 - RegExp.$1.length)));
 	for (var k in l) {
 		if (new RegExp("(".concat(k, ")")).test(d)) {
 			var t,
-			a = "S+" === k ? "000" : "00";
+				a = "S+" === k ? "000" : "00";
 			d = d.replace(RegExp.$1, 1 == RegExp.$1.length ? l[k] : ("".concat(a) + l[k]).substr("".concat(l[k]).length))
 		}
 	}
@@ -1881,27 +1928,27 @@ Date.prototype.Format = function (fmt) {
 
 function decrypt(time, stk, type, url) {
 	stk = stk || (url ? getJxmcUrlData(url, '_stk') : '')
-		if (stk) {
-			const timestamp = new Date(time).Format("yyyyMMddhhmmssSSS");
-			let hash1 = '';
-			if ($.fingerprint && $.Jxmctoken && $.enCryptMethodJD) {
-				hash1 = $.enCryptMethodJD($.Jxmctoken, $.fingerprint.toString(), timestamp.toString(), $.appId.toString(), $.CryptoJS).toString($.CryptoJS.enc.Hex);
-			} else {
-				const random = '5gkjB6SpmC9s';
-				$.Jxmctoken = `tk01wcdf61cb3a8nYUtHcmhSUFFCfddDPRvKvYaMjHkxo6Aj7dhzO+GXGFa9nPXfcgT+mULoF1b1YIS1ghvSlbwhE0Xc`;
-				$.fingerprint = 5287160221454703;
-				const str = `${$.Jxmctoken}${$.fingerprint}${timestamp}${$.appId}${random}`;
-				hash1 = $.CryptoJS.SHA512(str, $.Jxmctoken).toString($.CryptoJS.enc.Hex);
-			}
-			let st = '';
-			stk.split(',').map((item, index) => {
-				st += `${item}:${getJxmcUrlData(url, item)}${index === stk.split(',').length - 1 ? '' : '&'}`;
-			})
-			const hash2 = $.CryptoJS.HmacSHA256(st, hash1.toString()).toString($.CryptoJS.enc.Hex);
-			return encodeURIComponent(["".concat(timestamp.toString()), "".concat($.fingerprint.toString()), "".concat($.appId.toString()), "".concat($.Jxmctoken), "".concat(hash2)].join(";"))
+	if (stk) {
+		const timestamp = new Date(time).Format("yyyyMMddhhmmssSSS");
+		let hash1 = '';
+		if ($.fingerprint && $.Jxmctoken && $.enCryptMethodJD) {
+			hash1 = $.enCryptMethodJD($.Jxmctoken, $.fingerprint.toString(), timestamp.toString(), $.appId.toString(), $.CryptoJS).toString($.CryptoJS.enc.Hex);
 		} else {
-			return '20210318144213808;8277529360925161;10001;tk01w952a1b73a8nU0luMGtBanZTHCgj0KFVwDa4n5pJ95T/5bxO/m54p4MtgVEwKNev1u/BUjrpWAUMZPW0Kz2RWP8v;86054c036fe3bf0991bd9a9da1a8d44dd130c6508602215e50bb1e385326779d'
+			const random = '5gkjB6SpmC9s';
+			$.Jxmctoken = `tk01wcdf61cb3a8nYUtHcmhSUFFCfddDPRvKvYaMjHkxo6Aj7dhzO+GXGFa9nPXfcgT+mULoF1b1YIS1ghvSlbwhE0Xc`;
+			$.fingerprint = 5287160221454703;
+			const str = `${$.Jxmctoken}${$.fingerprint}${timestamp}${$.appId}${random}`;
+			hash1 = $.CryptoJS.SHA512(str, $.Jxmctoken).toString($.CryptoJS.enc.Hex);
 		}
+		let st = '';
+		stk.split(',').map((item, index) => {
+			st += `${item}:${getJxmcUrlData(url, item)}${index === stk.split(',').length - 1 ? '' : '&'}`;
+		})
+		const hash2 = $.CryptoJS.HmacSHA256(st, hash1.toString()).toString($.CryptoJS.enc.Hex);
+		return encodeURIComponent(["".concat(timestamp.toString()), "".concat($.fingerprint.toString()), "".concat($.appId.toString()), "".concat($.Jxmctoken), "".concat(hash2)].join(";"))
+	} else {
+		return '20210318144213808;8277529360925161;10001;tk01w952a1b73a8nU0luMGtBanZTHCgj0KFVwDa4n5pJ95T/5bxO/m54p4MtgVEwKNev1u/BUjrpWAUMZPW0Kz2RWP8v;86054c036fe3bf0991bd9a9da1a8d44dd130c6508602215e50bb1e385326779d'
+	}
 }
 
 async function requestAlgo() {
@@ -1980,14 +2027,14 @@ function getJxmcUrlData(url, name) {
 		return data ? data : '';
 	} else {
 		const query = url.match(/\?.*/)[0].substring(1)
-			const vars = query.split('&')
-			for (let i = 0; i < vars.length; i++) {
-				const pair = vars[i].split('=')
-					if (pair[0] === name) {
-						return vars[i].substr(vars[i].indexOf('=') + 1);
-					}
+		const vars = query.split('&')
+		for (let i = 0; i < vars.length; i++) {
+			const pair = vars[i].split('=')
+			if (pair[0] === name) {
+				return vars[i].substr(vars[i].indexOf('=') + 1);
 			}
-			return ''
+		}
+		return ''
 	}
 }
 
@@ -2054,16 +2101,16 @@ function Env(t, e) {
 		}
 		send(t, e = "GET") {
 			t = "string" == typeof t ? {
-				url: t
-			}
-			 : t;
+					url: t
+				}
+				: t;
 			let s = this.get;
 			return "POST" === e && (s = this.post),
-			new Promise((e, i) => {
-				s.call(this, t, (t, s, r) => {
-					t ? i(t) : e(s)
+				new Promise((e, i) => {
+					s.call(this, t, (t, s, r) => {
+						t ? i(t) : e(s)
+					})
 				})
-			})
 		}
 		get(t) {
 			return this.send.call(this.env, t)
@@ -2075,16 +2122,16 @@ function Env(t, e) {
 	return new class {
 		constructor(t, e) {
 			this.name = t,
-			this.http = new s(this),
-			this.data = null,
-			this.dataFile = "box.dat",
-			this.logs = [],
-			this.isMute = !1,
-			this.isNeedRewrite = !1,
-			this.logSeparator = "\n",
-			this.startTime = (new Date).getTime(),
-			Object.assign(this, e),
-			this.log("", `🔔${this.name}, 开始!`)
+				this.http = new s(this),
+				this.data = null,
+				this.dataFile = "box.dat",
+				this.logs = [],
+				this.isMute = !1,
+				this.isNeedRewrite = !1,
+				this.logSeparator = "\n",
+				this.startTime = (new Date).getTime(),
+				Object.assign(this, e),
+				this.log("", `🔔${this.name}, 开始!`)
 		}
 		isNode() {
 			return "undefined" != typeof module && !!module.exports
@@ -2141,20 +2188,20 @@ function Env(t, e) {
 				i = i ? i.replace(/\n/g, "").trim() : i;
 				let r = this.getdata("@chavy_boxjs_userCfgs.httpapi_timeout");
 				r = r ? 1 * r : 20,
-				r = e && e.timeout ? e.timeout : r;
+					r = e && e.timeout ? e.timeout : r;
 				const[o, h] = i.split("@"),
-				n = {
-					url: `http://${h}/v1/scripting/evaluate`,
-					body: {
-						script_text: t,
-						mock_type: "cron",
-						timeout: r
-					},
-					headers: {
-						"X-Key": o,
-						Accept: "*/*"
-					}
-				};
+					n = {
+						url: `http://${h}/v1/scripting/evaluate`,
+						body: {
+							script_text: t,
+							mock_type: "cron",
+							timeout: r
+						},
+						headers: {
+							"X-Key": o,
+							Accept: "*/*"
+						}
+					};
 				this.post(n, (t, e, i) => s(i))
 			}).catch(t => this.logErr(t))
 		}
@@ -2162,11 +2209,11 @@ function Env(t, e) {
 			if (!this.isNode())
 				return {}; {
 				this.fs = this.fs ? this.fs : require("fs"),
-				this.path = this.path ? this.path : require("path");
+					this.path = this.path ? this.path : require("path");
 				const t = this.path.resolve(this.dataFile),
-				e = this.path.resolve(process.cwd(), this.dataFile),
-				s = this.fs.existsSync(t),
-				i = !s && this.fs.existsSync(e);
+					e = this.path.resolve(process.cwd(), this.dataFile),
+					s = this.fs.existsSync(t),
+					i = !s && this.fs.existsSync(e);
 				if (!s && !i)
 					return {}; {
 					const i = s ? t : e;
@@ -2181,12 +2228,12 @@ function Env(t, e) {
 		writedata() {
 			if (this.isNode()) {
 				this.fs = this.fs ? this.fs : require("fs"),
-				this.path = this.path ? this.path : require("path");
+					this.path = this.path ? this.path : require("path");
 				const t = this.path.resolve(this.dataFile),
-				e = this.path.resolve(process.cwd(), this.dataFile),
-				s = this.fs.existsSync(t),
-				i = !s && this.fs.existsSync(e),
-				r = JSON.stringify(this.data);
+					e = this.path.resolve(process.cwd(), this.dataFile),
+					s = this.fs.existsSync(t),
+					i = !s && this.fs.existsSync(e),
+					r = JSON.stringify(this.data);
 				s ? this.fs.writeFileSync(t, r) : i ? this.fs.writeFileSync(e, r) : this.fs.writeFileSync(t, r)
 			}
 		}
@@ -2205,7 +2252,7 @@ function Env(t, e) {
 			let e = this.getval(t);
 			if (/^@/.test(t)) {
 				const[, s, i] = /^@(.*?)\.(.*?)$/.exec(t),
-				r = s ? this.getval(s) : "";
+					r = s ? this.getval(s) : "";
 				if (r)
 					try {
 						const t = JSON.parse(r);
@@ -2220,16 +2267,16 @@ function Env(t, e) {
 			let s = !1;
 			if (/^@/.test(e)) {
 				const[, i, r] = /^@(.*?)\.(.*?)$/.exec(e),
-				o = this.getval(i),
-				h = i ? "null" === o ? null : o || "{}" : "{}";
+					o = this.getval(i),
+					h = i ? "null" === o ? null : o || "{}" : "{}";
 				try {
 					const e = JSON.parse(h);
 					this.lodash_set(e, r, t),
-					s = this.setval(JSON.stringify(e), i)
+						s = this.setval(JSON.stringify(e), i)
 				} catch (e) {
 					const o = {};
 					this.lodash_set(o, r, t),
-					s = this.setval(JSON.stringify(o), i)
+						s = this.setval(JSON.stringify(o), i)
 				}
 			} else
 				s = this.setval(t, e);
@@ -2243,20 +2290,20 @@ function Env(t, e) {
 		}
 		initGotEnv(t) {
 			this.got = this.got ? this.got : require("got"),
-			this.cktough = this.cktough ? this.cktough : require("tough-cookie"),
-			this.ckjar = this.ckjar ? this.ckjar : new this.cktough.CookieJar,
+				this.cktough = this.cktough ? this.cktough : require("tough-cookie"),
+				this.ckjar = this.ckjar ? this.ckjar : new this.cktough.CookieJar,
 			t && (t.headers = t.headers ? t.headers : {}, void 0 === t.headers.Cookie && void 0 === t.cookieJar && (t.cookieJar = this.ckjar))
 		}
 		get(t, e = (() => {})) {
 			t.headers && (delete t.headers["Content-Type"], delete t.headers["Content-Length"]),
-			this.isSurge() || this.isLoon() ? (this.isSurge() && this.isNeedRewrite && (t.headers = t.headers || {}, Object.assign(t.headers, {
-						"X-Surge-Skip-Scripting": !1
-					})), $httpClient.get(t, (t, s, i) => {
+				this.isSurge() || this.isLoon() ? (this.isSurge() && this.isNeedRewrite && (t.headers = t.headers || {}, Object.assign(t.headers, {
+					"X-Surge-Skip-Scripting": !1
+				})), $httpClient.get(t, (t, s, i) => {
 					!t && s && (s.body = i, s.statusCode = s.status),
-					e(t, s, i)
+						e(t, s, i)
 				})) : this.isQuanX() ? (this.isNeedRewrite && (t.opts = t.opts || {}, Object.assign(t.opts, {
-						hints: !1
-					})), $task.fetch(t).then(t => {
+					hints: !1
+				})), $task.fetch(t).then(t => {
 					const {
 						statusCode: s,
 						statusCode: i,
@@ -2274,7 +2321,7 @@ function Env(t, e) {
 						if (t.headers["set-cookie"]) {
 							const s = t.headers["set-cookie"].map(this.cktough.Cookie.parse).toString();
 							s && this.ckjar.setCookieSync(s, null),
-							e.cookieJar = this.ckjar
+								e.cookieJar = this.ckjar
 						}
 					} catch (t) {
 						this.logErr(t)
@@ -2303,15 +2350,15 @@ function Env(t, e) {
 		post(t, e = (() => {})) {
 			if (t.body && t.headers && !t.headers["Content-Type"] && (t.headers["Content-Type"] = "application/x-www-form-urlencoded"), t.headers && delete t.headers["Content-Length"], this.isSurge() || this.isLoon())
 				this.isSurge() && this.isNeedRewrite && (t.headers = t.headers || {}, Object.assign(t.headers, {
-						"X-Surge-Skip-Scripting": !1
-					})), $httpClient.post(t, (t, s, i) => {
+					"X-Surge-Skip-Scripting": !1
+				})), $httpClient.post(t, (t, s, i) => {
 					!t && s && (s.body = i, s.statusCode = s.status),
-					e(t, s, i)
+						e(t, s, i)
 				});
 			else if (this.isQuanX())
 				t.method = "POST", this.isNeedRewrite && (t.opts = t.opts || {}, Object.assign(t.opts, {
-						hints: !1
-					})), $task.fetch(t).then(t => {
+					hints: !1
+				})), $task.fetch(t).then(t => {
 					const {
 						statusCode: s,
 						statusCode: i,
@@ -2375,16 +2422,16 @@ function Env(t, e) {
 					return t;
 				if ("string" == typeof t)
 					return this.isLoon() ? t : this.isQuanX() ? {
-						"open-url": t
-					}
-				 : this.isSurge() ? {
-					url: t
-				}
-				 : void 0;
+							"open-url": t
+						}
+						: this.isSurge() ? {
+								url: t
+							}
+							: void 0;
 				if ("object" == typeof t) {
 					if (this.isLoon()) {
 						let e = t.openUrl || t.url || t["open-url"],
-						s = t.mediaUrl || t["media-url"];
+							s = t.mediaUrl || t["media-url"];
 						return {
 							openUrl: e,
 							mediaUrl: s
@@ -2392,7 +2439,7 @@ function Env(t, e) {
 					}
 					if (this.isQuanX()) {
 						let e = t["open-url"] || t.url || t.openUrl,
-						s = t["media-url"] || t.mediaUrl;
+							s = t["media-url"] || t.mediaUrl;
 						return {
 							"open-url": e,
 							"media-url": s
@@ -2411,13 +2458,13 @@ function Env(t, e) {
 				t.push(e),
 				s && t.push(s),
 				i && t.push(i),
-				console.log(t.join("\n")),
-				this.logs = this.logs.concat(t)
+					console.log(t.join("\n")),
+					this.logs = this.logs.concat(t)
 			}
 		}
 		log(...t) {
 			t.length > 0 && (this.logs = [...this.logs, ...t]),
-			console.log(t.join(this.logSeparator))
+				console.log(t.join(this.logSeparator))
 		}
 		logErr(t, e) {
 			const s = !this.isSurge() && !this.isQuanX() && !this.isLoon();
@@ -2428,9 +2475,9 @@ function Env(t, e) {
 		}
 		done(t = {}) {
 			const e = (new Date).getTime(),
-			s = (e - this.startTime) / 1e3;
+				s = (e - this.startTime) / 1e3;
 			this.log("", `🔔${this.name}, 结束! 🕛 ${s} 秒`),
-			this.log(),
+				this.log(),
 			(this.isSurge() || this.isQuanX() || this.isLoon()) && $done(t)
 		}
 	}
