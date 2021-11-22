@@ -41,7 +41,7 @@ cron:47 2 18-23 11 *
 
 */
 let guaopencard_addSku = "true"
-let guaopencard = "false"
+let guaopencard = "true"
 let guaopenwait = "0"
 let guaopencard_draw = "3"
 let rewardBean = '1,2,3'; // 京豆奖励判断 | 1=邀请 2=开卡 3=关注  | 填1,2,3
