@@ -115,17 +115,14 @@ async function jdFruit() {
       // ***************************
       // 报告运行次数
       if (ZLC) {
-        $.get({
-          url: `https://api.jdsharecode.xyz/api/runTimes?activityId=farm&sharecode=${$.farmInfo.farmUserPro.shareCode}`
-        }, (err, resp, data) => {
-          if (err) {
-            console.log('上报失败', err)
-          } else {
-            if (data === '1' || data === '0') {
-              console.log('上报成功')
-            }
+        for (let k = 0; k < 5; k++) {
+          try {
+            await runTimes()
+            break
+          } catch (e) {
           }
-        })
+          await $.wait(Math.floor(Math.random() * 10 + 3) * 1000)
+        }
       }
       // ***************************
       // option['media-url'] = $.farmInfo.farmUserPro.goodsImage;
@@ -178,6 +175,21 @@ async function jdFruit() {
     // $.msg($.name, '', `${errMsg}`)
   }
   await showMsg();
+}
+function runTimes() {
+  return new Promise((resolve, reject) => {
+    $.get({
+      url: `https://api.jdsharecode.xyz/api/runTimes?activityId=farm&sharecode=${$.farmInfo.farmUserPro.shareCode}`
+    }, (err, resp, data) => {
+      if (err) {
+        console.log('上报失败', err)
+        reject(err)
+      } else {
+        console.log(data)
+        resolve()
+      }
+    })
+  })
 }
 async function doDailyTask() {
   await taskInitForFarm();
@@ -441,7 +453,7 @@ async function doTenWaterAgain() {
   // }
   // 所有的浇水(10次浇水)任务，获取水滴任务完成后，如果剩余水滴大于等于60g,则继续浇水(保留部分水滴是用于完成第二天的浇水10次的任务)
   let overageEnergy = totalEnergy - retainWater;
-  if (totalEnergy >= ($.farmInfo.farmUserPro.treeTotalEnergy - $.farmInfo.farmUserPro.treeEnergy)) {
+  if (overageEnergy >= ($.farmInfo.farmUserPro.treeTotalEnergy - $.farmInfo.farmUserPro.treeEnergy)) {
     //如果现有的水滴，大于水果可兑换所需的对滴(也就是把水滴浇完，水果就能兑换了)
     isFruitFinished = false;
     for (let i = 0; i < ($.farmInfo.farmUserPro.treeTotalEnergy - $.farmInfo.farmUserPro.treeEnergy) / 10; i++) {
@@ -1434,8 +1446,6 @@ function shareCodesFormat() {
     }
     if (!ZLC) {
       console.log(`您设置了不加入助力池，跳过\n`)
-    } else {
-
     }
     console.log(`第${$.index}个京东账号将要助力的好友${JSON.stringify(newShareCodes)}`)
     resolve();
