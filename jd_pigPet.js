@@ -27,9 +27,8 @@ const MISSION_BASE_API = `https://ms.jr.jd.com/gw/generic/mission/h5/m`;
 const notify = $.isNode() ? require('./sendNotify') : '';
 //Node.js用户请在jdCookie.js处填写京东ck;
 const jdCookieNode = $.isNode() ? require('./jdCookie.js') : '';
-let shareId = ["t_7LVGP8mopofh8AG0Q7E8AdoUJQ3Dik", "0IzWPVQGlmepafqlqgOSXw", "zExA7lNc3HrJrbVuG3xRVMAdoUJQ3Dik", "cvwWiz9o2evNHFdNk0oNbMAdoUJQ3Dik"][Math.floor((Math.random() * 4))];
-let helpId = ["9fc0f627-6fa8-442f-a703-dc2673d71d3b", "92efd5b1-d5df-4d9a-a153-c165161d288e", "6e3d78ce-e6cd-43ec-9790-960d9089c023", "b62e75e8-e682-44b9-ab99-75cd0a99b327"];
-$.shareCodes = [];
+let shareId = ['MXOBdAzkir2drT7_mG3QEcAdoUJQ3Dik'][Math.floor((Math.random() * 4))];
+$.shareCodes = ['3be01b21-dd3c-4b61-9e1e-b55823ee4689'];
 if ($.isNode()) {
   Object.keys(jdCookieNode).forEach((item) => {
     cookiesArr.push(jdCookieNode[item])
@@ -44,7 +43,8 @@ if ($.isNode()) {
     $.msg($.name, '【提示】请先获取京东账号一cookie\n直接使用NobyDa的京东签到获取', 'https://bean.m.jd.com/bean/signIndex.action', { "open-url": "https://bean.m.jd.com/bean/signIndex.action" });
     return;
   }
-  console.log(`\n【原作者：LXK大佬】\n\nBy：zero205\n添加：邀请新用户，大转盘助力，抢粮食\n修改：优化日志输出，自动喂食\n\n默认不抢粮食（成功机率小），需要的请添加变量JD_PIGPET_PK，值填true\n`);
+  await getShareCode();
+  console.log(`\n【原作者：LXK大佬】\n\nBy：zero205\n添加：邀请新用户，大转盘助力，抢粮食\n修改：优化日志输出，自动喂食\n\n默认不抢粮食（成功机率小），需要的请添加变量JD_PIGPET_PK，值填true\nTodo：领取成就奖励\n`);
   for (let i = 0; i < cookiesArr.length; i++) {
     if (cookiesArr[i]) {
       cookie = cookiesArr[i];
@@ -66,7 +66,7 @@ if ($.isNode()) {
     }
   }
   console.log(`\n======开始大转盘助力======\n`);
-  $.shareCodes = [...$.shareCodes, ...helpId]
+  $.shareCodes = [...$.shareCodes, ...($.helpId || [])]
   for (let j = 0; j < cookiesArr.length; j++) {
     cookie = cookiesArr[j];
     if ($.shareCodes && $.shareCodes.length) {
@@ -83,12 +83,12 @@ if ($.isNode()) {
     $.msg($.name, '', allMessage);
   }
 })()
-  .catch((e) => {
-    $.log('', `❌ ${$.name}, 失败! 原因: ${e}!`, '')
-  })
-  .finally(() => {
-    $.done();
-  })
+    .catch((e) => {
+      $.log('', `❌ ${$.name}, 失败! 原因: ${e}!`, '')
+    })
+    .finally(() => {
+      $.done();
+    })
 async function jdPigPet() {
   try {
     await pigPetLogin();
@@ -99,7 +99,7 @@ async function jdPigPet() {
     await pigPetLotteryIndex();
     await pigPetLottery();
     if (process.env.JD_PIGPET_PK && process.env.JD_PIGPET_PK === 'true') {
-    await pigPetRank();
+      await pigPetRank();
     }
     await pigPetMissionList();
     await missions();
@@ -195,6 +195,7 @@ function pigPetUserBag() {
                         item.count = item.count - 20
                         i--
                       } while (item.count >= 20 && i > 0)
+                      if ($.finish) break
                     }
                   }
                 } else {
@@ -410,9 +411,12 @@ function pigPetRank() {
                 for (let i = 0; i < $.friends.length; i++) {
                   if ($.friends[i].status === 1) {
                     $.friendId = $.friends[i].uid
-                    console.log(`去抢夺【${$.friends[i].nickName}】的食物`)
-                    await $.wait(2000)
-                    await pigPetFriendIndex($.friendId)
+                    $.name = $.friends[i].nickName
+                    if (!['zero205', 'xfa05'].includes($.name)) { //放过孩子吧TT
+                      console.log(`去抢夺【${$.friends[i].nickName}】的食物`)
+                      await $.wait(2000)
+                      await pigPetFriendIndex($.friendId)
+                    }
                   }
                 }
               } else {
@@ -689,8 +693,6 @@ function pigPetDoMission(mid) {
                 if (data.resultData.resultData) {
                   if (data.resultData.resultData.award) {
                     console.log(`奖励${data.resultData.resultData.award.name},数量:${data.resultData.resultData.award.count}`)
-                  } if (data.resultData.resultData.status === 3) {
-                    console.log('此任务需手动完成')
                   }
                 }
               } else {
@@ -859,6 +861,31 @@ function finishReadMission(missionId, readTime) {
     })
   })
 }
+
+function getShareCode() {
+  return new Promise(resolve => {
+    $.get({
+      url: "https://raw.fastgit.org/zero205/updateTeam/main/shareCodes/pig.json",
+      headers: {
+        "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1 Edg/87.0.4280.88"
+      }
+    }, async (err, resp, data) => {
+      try {
+        if (err) {
+          console.log(`${JSON.stringify(err)}`);
+          console.log(`${$.name} API请求失败，请检查网路重试`);
+        } else {
+          $.helpId = JSON.parse(data);
+        }
+      } catch (e) {
+        $.logErr(e, resp)
+      } finally {
+        resolve();
+      }
+    })
+  })
+}
+
 function TotalBean() {
   return new Promise(async resolve => {
     const options = {
