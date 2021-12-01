@@ -41,7 +41,7 @@ cron:47 4 27-30,1,2 11,12 *
 
 */
 let guaopencard_addSku = "false"
-let guaopencard = "false"
+let guaopencard = "true"
 let guaopenwait = "0"
 let guaopencard_draw = "0"
 
