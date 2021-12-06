@@ -1,19 +1,27 @@
 // @grant nodejs
 /*
 ENV
-JOY_COIN_MAXIMIZE =      最大化硬币收益，如果合成后全部挖土后还有空位，则开启此模式（默认关闭） 0关闭 1开启
+
+JOY_COIN_MAXIMIZE =      最大化硬币收益，如果合成后全部挖土后还有空位，则开启此模式（默认开启） 0关闭 1开启
+
 请确保新用户助力过开工位，否则开启游戏了就不算新用户，后面就不能助力开工位了！！！！！！！！！！
+
 脚本会默认帮zero205助力开工位，如需关闭请添加变量，变量名：HELP_JOYPARK，变量值：false
+
 更新地址：https://github.com/Tsukasa007/my_script
+
 ============Quantumultx===============
 [task_local]
 #汪汪乐园养joy
 20 0-23/3 * * * jd_joypark_joy.js, tag=汪汪乐园养joy, img-url=https://raw.githubusercontent.com/tsukasa007/icon/master/jd_joypark_joy.png, enabled=true
+
 ================Loon==============
 [Script]
 cron "20 0-23/3 * * *" script-path=jd_joypark_joy.js,tag=汪汪乐园养joy
+
 ===============Surge=================
 汪汪乐园养joy = type=cron,cronexp="20 0-23/3 * * *",wake-system=1,timeout=3600,script-path=jd_joypark_joy.js
+
 ============小火箭=========
 汪汪乐园养joy = type=cron,script-path=jd_joypark_joy.js, cronexpr="20 0-23/3 * * *", timeout=3600, enable=true
 */
@@ -23,7 +31,7 @@ const jdCookieNode = $.isNode() ? require('./jdCookie.js') : '';
 const notify = $.isNode() ? require('./sendNotify') : '';
 //IOS等用户直接用NobyDa的jd cookie
 let cookiesArr = [],
-  cookie = '';
+    cookie = '';
 if ($.isNode()) {
   Object.keys(jdCookieNode).forEach((item) => {
     cookiesArr.push(jdCookieNode[item])
@@ -35,7 +43,7 @@ if ($.isNode()) {
 
 //最大化硬币收益模式
 $.JOY_COIN_MAXIMIZE = process.env.JOY_COIN_MAXIMIZE === '1'
-$.log(`最大化收益模式: 已${$.JOY_COIN_MAXIMIZE ? `默认已开启` : `关闭`}  `)
+$.log(`最大化收益模式: 已${$.JOY_COIN_MAXIMIZE ? `默认开启` : `关闭`}  `)
 
 const JD_API_HOST = `https://api.m.jd.com/client.action`;
 message = ""
@@ -52,7 +60,7 @@ message = ""
     return;
   }
   for (let i = 0; i < cookiesArr.length; i++) {
-    //$.wait(50) 
+    //$.wait(50)
     // if (process.env.JOYPARK_JOY_START && i == process.env.JOYPARK_JOY_START){
     //   console.log(`\n汪汪乐园养joy 只运行 ${process.env.JOYPARK_JOY_START} 个Cookie\n`);
     //   break
@@ -74,26 +82,25 @@ message = ""
         continue
       }
       console.log(`\n\n******开始【京东账号${$.index}】${$.nickName || $.UserName}*********\n`);
-      $.kgw_invitePin = ['TMKFyu4IQa1Z3oSwgkg9dQAQqFRuOqD0inp0Kvj9LdI'];
       if ($.isNode()) {
         if (process.env.HELP_JOYPARK && process.env.HELP_JOYPARK == "false") {
         } else {
           // await getShareCode()
-          if ($.kgw_invitePin && $.kgw_invitePin.length) {
-            $.log("开始帮【zero205】助力开工位\n");
-       
-            let resp = await getJoyBaseInfo(undefined, 2, $.kgw_invitePin);
-            if (resp.helpState && resp.helpState === 1) {
-              $.log("帮【zero205】开工位成功，感谢！\n");
-            } else if (resp.helpState && resp.helpState === 3) {
-              $.log("你不是新用户！跳过开工位助力\n");
-            } else if (resp.helpState && resp.helpState === 2) {
-              $.log(`他的工位已全部开完啦！\n`);
-            } else {
-              $.log("开工位失败！\n");
-              console.log(`${JSON.stringify(resp)}`)
-            }
-          }
+          // if ($.kgw_invitePin && $.kgw_invitePin.length) {
+          //   $.log("开始帮【zero205】助力开工位\n");
+          //   $.kgw_invitePin = [...($.kgw_invitePin || [])][Math.floor((Math.random() * $.kgw_invitePin.length))];
+          //   let resp = await getJoyBaseInfo(undefined, 2, $.kgw_invitePin);
+          //   if (resp.helpState && resp.helpState === 1) {
+          //     $.log("帮【zero205】开工位成功，感谢！\n");
+          //   } else if (resp.helpState && resp.helpState === 3) {
+          //     $.log("你不是新用户！跳过开工位助力\n");
+          //   } else if (resp.helpState && resp.helpState === 2) {
+          //     $.log(`他的工位已全部开完啦！\n`);
+          //   } else {
+          //     $.log("开工位失败！\n");
+          //     console.log(`${JSON.stringify(resp)}`)
+          //   }
+          // }
         }
       }
       //下地后还有有钱买Joy并且买了Joy
@@ -107,12 +114,12 @@ message = ""
       await doJoyMoveDownAll($.workJoyInfoList)
       //从低合到高
       await doJoyMergeAll($.activityJoyList)
-      await getJoyList(true)
+      await getGameMyPrize()
     }
   }
 })()
-  .catch((e) => $.logErr(e))
-  .finally(() => $.done())
+    .catch((e) => $.logErr(e))
+    .finally(() => $.done())
 
 
 async function getJoyBaseInfo(taskId = '', inviteType = '', inviterPin = '', printLog = false) {
@@ -128,7 +135,7 @@ async function getJoyBaseInfo(taskId = '', inviteType = '', inviterPin = '', pri
           if (printLog) {
             $.log(`等级: ${data.data.level}|金币: ${data.data.joyCoin}`);
             if (data.data.level >= 30 && $.isNode()) {
-              await notify.sendNotify(`${$.name} - 账号${$.index} - ${$.nickName}`, `【京东账号${$.index}】${$.nickName || $.UserName}\n当前等级: ${data.data.level}\n已达到单次最高等级奖励\n请尽快前往活动查看领取\n活动入口：京东极速版APP->汪汪乐园\n更多脚本->"https://github.com/zero205/JD_tencent_scf"`);
+              await notify.sendNotify(`${$.name} - 账号${$.index} - ${$.nickName}`, `【京东账号${$.index}】${$.nickName || $.UserName}\n当前等级: ${data.data.level}\n已达到单次最高等级奖励\n请前往京东极速版APP查看使用优惠券\n活动入口：京东极速版APP->我的->汪汪乐园`);
               $.log(`\n开始解锁新场景...\n`);
               await doJoyRestart()
             }
@@ -216,9 +223,9 @@ async function doJoyMoveUpAll(activityJoyList, workJoyInfoList) {
     await getJoyList()
     await doJoyMoveUpAll($.activityJoyList, $.workJoyInfoList)
   }
-  // else if ($.JOY_COIN_MAXIMIZE) {
-  //   await joyCoinMaximize(workJoyInfoUnlockList)
-  // }
+  else if ($.JOY_COIN_MAXIMIZE) {
+    await joyCoinMaximize(workJoyInfoUnlockList)
+  }
 
 }
 
@@ -429,27 +436,81 @@ function doJoyRestart() {
   })
 }
 
+function getGameMyPrize() {
+  return new Promise(resolve => {
+    $.post(taskPostClientActionUrl(`body={"linkId":"LsQNxL7iWDlXUs6cFl-AAg"}&appid=activities_platform`, `gameMyPrize`), async (err, resp, data) => {
+      try {
+        if (err) {
+          console.log(`${JSON.stringify(err)}`)
+          console.log(`${$.name} API请求失败，请检查网路重试`)
+        } else {
+          data = JSON.parse(data);
+          if (data.success && data.data) {
+            $.Vos = data.data.gamePrizeItemVos
+            for (let i = 0; i < $.Vos.length; i++) {
+              if ($.Vos[i].prizeType == 4 && $.Vos[i].status == 1 && $.Vos[i].prizeTypeVO.prizeUsed == 0) {
+                $.log(`\n当前账号有【${$.Vos[i].prizeName}】可提现`)
+                $.id = $.Vos[i].prizeTypeVO.id
+                $.poolBaseId = $.Vos[i].prizeTypeVO.poolBaseId
+                $.prizeGroupId = $.Vos[i].prizeTypeVO.prizeGroupId
+                $.prizeBaseId = $.Vos[i].prizeTypeVO.prizeBaseId
+                await apCashWithDraw($.id, $.poolBaseId, $.prizeGroupId, $.prizeBaseId)
+              }
+            }
+          }
+        }
+      } catch (e) {
+        $.logErr(e, resp)
+      } finally {
+        resolve(data);
+      }
+    })
+  })
+}
+
+function apCashWithDraw(id, poolBaseId, prizeGroupId, prizeBaseId) {
+  return new Promise(resolve => {
+    $.post(taskPostClientActionUrl(`body={"businessSource":"JOY_PARK","base":{"id":${id},"business":"joyPark","poolBaseId":${poolBaseId},"prizeGroupId":${prizeGroupId},"prizeBaseId":${prizeBaseId},"prizeType":4},"linkId":"LsQNxL7iWDlXUs6cFl-AAg"}&_t=${+new Date()}&appid=activities_platform`, `apCashWithDraw`), async (err, resp, data) => {
+      try {
+        if (err) {
+          console.log(`${JSON.stringify(err)}`)
+          console.log(`${$.name} API请求失败，请检查网路重试`)
+        } else {
+          data = JSON.parse(data);
+          if (data.success && data.data) {
+            console.log(`提现结果：${JSON.stringify(data)}`)
+          }
+        }
+      } catch (e) {
+        $.logErr(e, resp)
+      } finally {
+        resolve(data);
+      }
+    })
+  })
+}
+
 function getShareCode() {
   return new Promise(resolve => {
-      $.get({
-          url: "https://raw.fastgit.org/zero205/updateTeam/main/shareCodes/joypark.json",
-          headers: {
-              "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1 Edg/87.0.4280.88"
-          }
-      }, async (err, resp, data) => {
-          try {
-              if (err) {
-                  console.log(`${JSON.stringify(err)}`);
-                  console.log(`${$.name} API请求失败，请检查网路重试`);
-              } else {
-                $.kgw_invitePin = JSON.parse(data);
-              }
-          } catch (e) {
-              $.logErr(e, resp)
-          } finally {
-              resolve();
-          }
-      })
+    $.get({
+      url: "https://raw.fastgit.org/zero205/updateTeam/main/shareCodes/joypark.json",
+      headers: {
+        "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1 Edg/87.0.4280.88"
+      }
+    }, async (err, resp, data) => {
+      try {
+        if (err) {
+          console.log(`${JSON.stringify(err)}`);
+          console.log(`${$.name} API请求失败，请检查网路重试`);
+        } else {
+          $.kgw_invitePin = JSON.parse(data);
+        }
+      } catch (e) {
+        $.logErr(e, resp)
+      } finally {
+        resolve();
+      }
+    })
   })
 }
 
