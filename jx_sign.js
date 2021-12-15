@@ -60,7 +60,7 @@ if ($.isNode()) {
       UA = `jdpingou;iPhone;4.13.0;14.4.2;${randomString(40)};network/wifi;model/iPhone10,2;appBuild/100609;supportApplePay/1;hasUPPay/0;pushNoticeIsOpen/1;hasOCPay/0;supportBestPay/0;session/${Math.random * 98 + 1};pap/JA2019_3111789;brand/apple;supportJDSHWK/1;Mozilla/5.0 (iPhone; CPU iPhone OS 14_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148`
       UAInfo[$.UserName] = UA
       if (isLoginInfo[$.UserName] === false) {
-
+      
       } else {
         if (!isLoginInfo[$.UserName]) {
           await TotalBean();
@@ -96,7 +96,7 @@ if ($.isNode()) {
       $.black = false
       $.canHelp = true
       if (isLoginInfo[$.UserName] === false) {
-
+      
       } else {
         if (!isLoginInfo[$.UserName]) {
           await TotalBean();
@@ -166,12 +166,12 @@ if ($.isNode()) {
     }
   }
 })()
-    .catch((e) => {
-      $.log("", `❌ ${$.name}, 失败! 原因: ${e}!`, "");
-    })
-    .finally(() => {
-      $.done();
-    })
+  .catch((e) => {
+    $.log("", `❌ ${$.name}, 失败! 原因: ${e}!`, "");
+  })
+  .finally(() => {
+    $.done();
+  })
 
 // 查询信息
 function signhb(type = 1) {
@@ -280,24 +280,24 @@ function helpSignhb(smp = '') {
 function dotask(task) {
   return new Promise((resolve) => {
     $.get(taskUrl("signhb/dotask", `signhb_source=1000&task=${task}&ispp=0&tk=`), async (err, resp, data) => {
-      try {
-        if (err) {
-          console.log(JSON.stringify(err));
-          console.log(`${$.name} dotask API请求失败，请检查网路重试`);
-        } else {
-          data = JSON.parse(data.match(new RegExp(/jsonpCBK.?\((.*);*/))[1])
-          if (data.ret === 0) {
-            console.log(`完成任务 获得${data.sendhb}红包`);
+        try {
+          if (err) {
+            console.log(JSON.stringify(err));
+            console.log(`${$.name} dotask API请求失败，请检查网路重试`);
           } else {
-            console.log(data.errmsg);
+            data = JSON.parse(data.match(new RegExp(/jsonpCBK.?\((.*);*/))[1])
+            if (data.ret === 0) {
+              console.log(`完成任务 获得${data.sendhb}红包`);
+            } else {
+              console.log(data.errmsg);
+            }
           }
+        } catch (e) {
+          $.logErr(e, resp);
+        } finally {
+          resolve(data);
         }
-      } catch (e) {
-        $.logErr(e, resp);
-      } finally {
-        resolve(data);
-      }
-    });
+      });
   });
 }
 
