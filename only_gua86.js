@@ -35,9 +35,9 @@ cron:30 2 21-31/2,2-5/2 12,1 *
 
 */
 let guaopencard_addSku = "false"
-let guaopencard = "false"
+let guaopencard = "true"
 let guaopenwait = "0"
-let guaopencard_draw = "0"
+let guaopencard_draw = "3"
 
 const $ = new Env('12.20~1.5 双旦寻宝 玩转大富翁-2');
 const jdCookieNode = $.isNode() ? require('./jdCookie.js') : '';

@@ -38,7 +38,7 @@ cron:47 3 13-20/2 12 *
 
 */
 let guaopencard_addSku = "false"
-let guaopencard = "false"
+let guaopencard = "true"
 let guaopenwait = "0"
 
 const $ = new Env('12.12~12.20 狂欢购');
