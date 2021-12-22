@@ -1,5 +1,8 @@
 
 /*
+[Script]
+cron "4/55 5/47 * * * ?" raw_jztt.js, tag:柠檬九章头条
+
 微信公众号柠檬玩机交流
 下载地址：
 APP商店 九章头条
@@ -22,10 +25,8 @@ export jzreadurl='https://api.st615.com/v1/user/info?token=抓包的token'
 https://api.st615.com/v1/user/info\?token=\S+ url script-request-header http://nm66.top/jzread.js
 
 hostname = api.st615.com
-*/
 
-// [task_local]
-// */60 * * * * http://nm66.top/jzread.js, tag=柠檬九章头条, img-url=circles.hexagongrid.fill.system, enabled=true
+*/
 
 const $ = new Env('柠檬九章头条');
 let status;
