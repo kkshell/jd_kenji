@@ -38,10 +38,10 @@ cron:30 3 18-24/3 1 *
 30 3 18-24/3 1 * https://raw.githubusercontent.com/smiek2121/scripts/master/gua_opencard108.js, tag=1.18~1.24 会员联合盛典 年货好物集结, enabled=true
 
 */
-let guaopencard_addSku = "false"
-let guaopencard = "false"
+let guaopencard_addSku = "true"
+let guaopencard = "true"
 let guaopenwait = "0"
-let guaopencard_draw = "0"
+let guaopencard_draw = "3"
 
 const $ = new Env('1.18~1.24 会员联合盛典 年货好物集结');
 const jdCookieNode = $.isNode() ? require('./jdCookie.js') : '';
