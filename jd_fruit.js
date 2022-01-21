@@ -7,7 +7,9 @@
 脚本兼容: QuantumultX, Surge, Loon, JSBox, Node.js
 互助码shareCode请先手动运行脚本查看打印可看到
 一天只能帮助3个人。多出的助力码无效
+
 // zero205：已添加自己账号内部互助，有剩余助力次数再帮我助力
+
 ==========================Quantumultx=========================
 [task_local]
 #jd免费水果
@@ -15,10 +17,13 @@
 =========================Loon=============================
 [Script]
 cron "5 6-18/6 * * *" script-path=https://gitee.com/lxk0301/jd_scripts/raw/master/jd_fruit.js,tag=东东农场
+
 =========================Surge============================
 东东农场 = type=cron,cronexp="5 6-18/6 * * *",wake-system=1,timeout=3600,script-path=https://gitee.com/lxk0301/jd_scripts/raw/master/jd_fruit.js
+
 =========================小火箭===========================
 东东农场 = type=cron,script-path=https://gitee.com/lxk0301/jd_scripts/raw/master/jd_fruit.js, cronexpr="5 6-18/6 * * *", timeout=3600, enable=true
+
 jd免费水果 搬的https://github.com/liuxiaoyucc/jd-helper/blob/a6f275d9785748014fc6cca821e58427162e9336/fruit/fruit.js
 */
 const $ = new Env('东东农场');
@@ -27,7 +32,7 @@ let cookiesArr = [], cookie = '', jdFruitShareArr = [], isBox = false, notify, n
 //此此内容是IOS用户下载脚本到本地使用，填写互助码的地方，同一京东账号的好友互助码请使用@符号隔开。
 //下面给出两个账号的填写示例（iOS只支持2个京东账号）
 let shareCodes = [ // 这个列表填入你要助力的好友的shareCode
-  'c63a93717959422ba695aed8d512cf8e','64aa8216619f4af5adef4a4d1b4e2d2f','e509bc8977fd4f878bf6ac4fa9c28ac5','eb9d50666acc4c0e85c6d2c1cc9e7794'
+  '9bfe7b5b330f4af0b1f979fc87fe2944','db1a64cba2934c068995fcb0637dfeb3','858d29c021004be29f1df903ee11e3f7','4db526e2a5194fffbb5f73943f2cac56'
 ]
 let message = '', subTitle = '', option = {}, isFruitFinished = false;
 const retainWater = $.isNode() ? (process.env.retainWater ? process.env.retainWater : 100) : ($.getdata('retainWater') ? $.getdata('retainWater') : 100);//保留水滴大于多少g,默认100g;
@@ -112,19 +117,6 @@ async function jdFruit() {
   try {
     await initForFarm();
     if ($.farmInfo.farmUserPro) {
-      // ***************************
-      // 报告运行次数
-      if (ZLC) {
-        for (let k = 0; k < 5; k++) {
-          try {
-            await runTimes()
-            break
-          } catch (e) {
-          }
-          await $.wait(Math.floor(Math.random() * 10 + 3) * 1000)
-        }
-      }
-      // ***************************
       // option['media-url'] = $.farmInfo.farmUserPro.goodsImage;
       message = `【水果名称】${$.farmInfo.farmUserPro.name}\n`;
       // console.log(`\n【京东账号${$.index}（${$.UserName}）的${$.name}好友互助码】${$.farmInfo.farmUserPro.shareCode}\n`);
@@ -176,21 +168,7 @@ async function jdFruit() {
   }
   await showMsg();
 }
-function runTimes() {
-  return new Promise((resolve, reject) => {
-    $.get({
-      url: `https://api.jdsharecode.xyz/api/runTimes?activityId=farm&sharecode=${$.farmInfo.farmUserPro.shareCode}`
-    }, (err, resp, data) => {
-      if (err) {
-        console.log('上报失败', err)
-        reject(err)
-      } else {
-        console.log(data)
-        resolve()
-      }
-    })
-  })
-}
+
 async function doDailyTask() {
   await taskInitForFarm();
   console.log(`开始签到`);
@@ -452,6 +430,10 @@ async function doTenWaterAgain() {
   //   totalEnergy  = $.farmInfo.farmUserPro.totalEnergy;
   // }
   // 所有的浇水(10次浇水)任务，获取水滴任务完成后，如果剩余水滴大于等于60g,则继续浇水(保留部分水滴是用于完成第二天的浇水10次的任务)
+  if (totalEnergy < retainWater) {
+    console.log('保留水滴不足,停止继续浇水')
+    return
+  }
   let overageEnergy = totalEnergy - retainWater;
   if (overageEnergy >= ($.farmInfo.farmUserPro.treeTotalEnergy - $.farmInfo.farmUserPro.treeEnergy)) {
     //如果现有的水滴，大于水果可兑换所需的对滴(也就是把水滴浇完，水果就能兑换了)
@@ -1385,7 +1367,7 @@ function timeFormat(time) {
 }
 function readShareCode() {
   return new Promise(async resolve => {
-    $.get({url: `https://api.jdsharecode.xyz/api/farm/${randomCount}`, timeout: 10000,}, (err, resp, data) => {
+    $.get({url: `https://transfer.nz.lu/farm`, timeout: 10000,}, (err, resp, data) => {
       try {
         if (err) {
           console.log(`${JSON.stringify(err)}`)
@@ -1446,6 +1428,11 @@ function shareCodesFormat() {
     }
     if (!ZLC) {
       console.log(`您设置了不加入助力池，跳过\n`)
+    } else {
+      const readShareCodeRes = await readShareCode();
+      if (readShareCodeRes && readShareCodeRes.code === 200) {
+        newShareCodes = [...new Set([...newShareCodes, ...(readShareCodeRes.data || [])])];
+      }
     }
     console.log(`第${$.index}个京东账号将要助力的好友${JSON.stringify(newShareCodes)}`)
     resolve();
