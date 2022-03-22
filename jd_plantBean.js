@@ -23,7 +23,7 @@
 
  按顺序给第(Math.floor((index - 1) / 6) + 1)个账号助力
  可能有BUG，但不会给别人号助力
-
+ .JD_DEBUG === 'false') console.log = () => { };
  */
 
 const $ = new Env('东东电竞经理');
