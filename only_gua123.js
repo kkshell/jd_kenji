@@ -46,26 +46,6 @@ const notify = $.isNode() ? require('./sendNotify') : '';
 CryptoScripts()
 $.CryptoJS = $.isNode() ? require('crypto-js') : CryptoJS;
 let cleanCart = ''
-if ($.isNode()) {
-    try {
-        const fs = require('fs');
-        if (fs.exostsSync('./cleancart_activity.sj')) {
-            cleanCart = require('./ckeancart_activity');
-        }
-    } catch(e) {
-
-    }
-}
-if ($.isNode()) {
-    try {
-        const fs = require('fs');
-        if (fs.exostsSync('./ckeancart_activity.js')) {
-            cleanCart = require('./cleancart_activity');
-        }
-    } catch (e) {
-
-    }
-}
 if($.isNode()){
     try{
         const fs = require('fs');
