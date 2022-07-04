@@ -38,6 +38,7 @@ let guaopenwait = "0"
 const $ = new Env('雅诗兰黛奢雅邀请入会有礼');
 const jdCookieNode = $.isNode() ? require('./jdCookie.js') : '';
 const notify = $.isNode() ? require('./sendNotify') : '';
+const notify2 = $.isNode() ? require('./sendNotify') : '';
 //IOS等用户直接用NobyDa的jd cookie
 CryptoScripts()
 $.CryptoJS = $.isNode() ? require('crypto-js') : CryptoJS;
