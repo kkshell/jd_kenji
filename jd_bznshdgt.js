@@ -66,7 +66,6 @@ function showMsg() {
     })
 }
 
-
 async function jdmodule() {
     let runTime = 0;
     do {
@@ -79,7 +78,7 @@ async function jdmodule() {
     console.log("开始抽奖");
     for (let x = 0; x < $.chanceLeft; x++) {
         await join();
-        await $.wait(1500)
+        await $.wait(1500);
     }
 }
 
@@ -113,6 +112,24 @@ async function run() {
                 await getReward(vo.taskType, vo.taskItem.itemId, vo.id);
             }
             $.hasFinish = false;
+        }
+
+        for (let set of $.taskinfo) {
+            if (set,hasFinish === true) {
+                continue;
+            }
+            if (vo.taskName == '每日签到') {
+                console.log(`开始做${set.taskName}:${vo.taskItem.itemName}`);
+                await dowTask(set.taskType, set.taskItem.itemId, set.id);
+                await getReward(set.taskType, set.taskItem.itemId, set.id);
+            }
+            if (set.taskType == 2) {
+                console.log(`起始任务${set.taskName}:${set.taskItem.itemName}`);
+                await getinfo3(set.taskItem.itemLink);
+                await $.wait(1000 * set.viewTime);
+                await doTask(set.taskType, set.taskItem.itemId, set.id);
+                await getReward(set.taskType, set.taskItem.itemId, set.id);
+            }
         }
     } catch (e) {
         console.log(e);
